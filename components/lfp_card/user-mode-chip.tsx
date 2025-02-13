@@ -1,4 +1,5 @@
 import React from "react";
+import { Badge } from "../ui/badge";
 
 interface UserModeChipProps {
   title: string;
@@ -12,14 +13,15 @@ const UserModeChip: React.FC<UserModeChipProps> = ({
   textColor,
 }) => {
   return (
-    <div
-      className={`h-min w-fit max-w-chip-1 select-none rounded-lg px-2 py-[3px] text-[9px] font-light leading-none 
-                bg-gray-500 text-main-gray
-                ${backgroundColor ? `bg-[#${backgroundColor}]` : ""}
-                ${textColor ? `text-[#${textColor}]` : ""}`}
+    <Badge
+      className="text-[10px] font-light text-white max-h-min bg-muted text-muted-foreground"
+      // className={`h-min w-fit max-w-chip-1 select-none rounded-lg px-2 py-[3px] text-[9px] font-light leading-none
+      //           bg-gray-500 text-main-gray text-white
+      //           ${backgroundColor ? `bg-[#${backgroundColor}]` : ""}
+      //           ${textColor ? `text-[#${textColor}]` : ""}`}
     >
       {title}
-    </div>
+    </Badge>
   );
 };
 

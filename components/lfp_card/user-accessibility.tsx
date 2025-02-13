@@ -1,6 +1,8 @@
 import React from "react";
 import AccessibilityIcons from "./accessibility-icons";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Badge } from "../ui/badge";
+import clsx from "clsx";
 
 interface UserAccessibilityProps {
   name: string;
@@ -10,15 +12,16 @@ const UserAccessibility: React.FC<UserAccessibilityProps> = ({ name }) => {
   return (
     <Tooltip>
       <TooltipTrigger>
-        <div
-          className={`h-min min-w-fit rounded-full ${
-            name === "discord" ? "bg-[#5367F7]" : "bg-slate-500"
-          } px-[6px] py-[2px]`}
+        <Badge
+          className={clsx(
+            "max-h-min px-2 py-1",
+            name === "discord" ? "bg-[#5367F7]" : "bg-primary"
+          )}
         >
           <AccessibilityIcons name={name} />
-        </div>
+        </Badge>
       </TooltipTrigger>
-      <TooltipContent>{name}</TooltipContent>
+      <TooltipContent>I have {name}</TooltipContent>
     </Tooltip>
   );
 };

@@ -1,5 +1,6 @@
 import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 
 interface UserRankProps {
   isLevelBased?: boolean;
@@ -12,7 +13,7 @@ const UserRank: React.FC<UserRankProps> = ({
   isLevelBased = false,
   levelPrefix = "AR",
   name = "20",
-  iconUrl = "https://via.placeholder.com/150",
+  iconUrl = "https://static.wikia.nocookie.net/valorant/images/0/0b/Immortal_3_Rank.png/revision/latest?cb=20200623203617",
 }) => {
   return (
     <Tooltip>
@@ -27,14 +28,10 @@ const UserRank: React.FC<UserRankProps> = ({
             </span>
           </div>
         ) : (
-          <span>
-            <img
-              alt="user_rank"
-              src={iconUrl}
-              className="w-9 select-none"
-              draggable="false"
-            />
-          </span>
+          <Avatar className="rounded-none">
+            <AvatarImage src={iconUrl} alt={name} />
+            <AvatarFallback>{name}</AvatarFallback>
+          </Avatar>
         )}
       </TooltipTrigger>
       <TooltipContent>{name}</TooltipContent>
