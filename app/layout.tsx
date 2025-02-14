@@ -15,6 +15,7 @@ import "./globals.css";
 
 const manrope = Manrope({
   variable: "--font-manrope",
+  subsets: ["latin", "cyrillic"],
 });
 
 const silkScreen = Silkscreen({
