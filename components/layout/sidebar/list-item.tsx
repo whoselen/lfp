@@ -6,7 +6,7 @@ import ListItemHoverContent from "./hover-content";
 
 interface ListItemProps {
   name: string;
-  description: string;
+  description?: string;
   avatarSrc: string;
   isCollapsed: boolean;
 }

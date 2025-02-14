@@ -1,6 +1,7 @@
 import React from "react";
 import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Badge } from "../ui/badge";
 
 interface UserRankProps {
   isLevelBased?: boolean;
@@ -28,10 +29,15 @@ const UserRank: React.FC<UserRankProps> = ({
             </span>
           </div>
         ) : (
-          <Avatar className="rounded-none">
-            <AvatarImage src={iconUrl} alt={name} />
-            <AvatarFallback>{name}</AvatarFallback>
-          </Avatar>
+          <div className="flex flex-col items-center gap-1">
+            <Avatar className="rounded-none">
+              <AvatarImage src={iconUrl} alt={name} />
+              <AvatarFallback>{name}</AvatarFallback>
+            </Avatar>
+            <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border border-border">
+              {name}
+            </Badge>
+          </div>
         )}
       </TooltipTrigger>
       <TooltipContent>{name}</TooltipContent>

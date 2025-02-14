@@ -1,12 +1,11 @@
 "use client";
-import type React from "react";
-import { useState, useEffect, useRef } from "react";
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Search } from "lucide-react";
+import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import { ListItem } from "./list-item";
-import SearchInput from "./search-input";
 import { SidebarLogo } from "./logo";
+import SearchInput from "./search-input";
 
 const communities = [
   {
@@ -43,7 +42,7 @@ const communities = [
 
 const MIN_SIDEBAR_WIDTH = 80;
 const MAX_SIDEBAR_WIDTH = 320;
-const COLLAPSE_THRESHOLD = 200;
+const COLLAPSE_THRESHOLD = 140;
 
 export function Sidebar() {
   const [sidebarWidth, setSidebarWidth] = useState(MAX_SIDEBAR_WIDTH);
@@ -65,8 +64,10 @@ export function Sidebar() {
     if (!isDragging) return;
 
     const newWidth = e.clientX;
-    if (newWidth >= MIN_SIDEBAR_WIDTH && newWidth <= MAX_SIDEBAR_WIDTH) {
-      setSidebarWidth(newWidth);
+    if (newWidth <= MAX_SIDEBAR_WIDTH) {
+      setSidebarWidth(MIN_SIDEBAR_WIDTH);
+    } else if (newWidth >= MIN_SIDEBAR_WIDTH) {
+      setSidebarWidth(MAX_SIDEBAR_WIDTH);
     } else if (newWidth < MIN_SIDEBAR_WIDTH) {
       setSidebarWidth(MIN_SIDEBAR_WIDTH);
     } else if (newWidth > MAX_SIDEBAR_WIDTH) {

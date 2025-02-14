@@ -4,12 +4,18 @@ import { Button } from "../ui/button";
 export const MessageButton = () => {
   return (
     <Button
-      className="rounded-full"
+      className="group rounded-full py-1 px-2.5 transition-transform hover:translate-x-0.5"
       variant="outline"
-      size="icon"
       aria-label="Message to user"
     >
-      <MessageSquare size={16} strokeWidth={2} aria-hidden="true" />
+      <div className="flex items-center transition-transform group-hover:translate-x-0.5">
+        <span className="hidden group-hover:block text-xs">Send a DM</span>
+        <MessageSquare
+          size={14}
+          aria-hidden="true"
+          className="group-hover:me-1 group-hover:ms-2 opacity-60 "
+        />
+      </div>
     </Button>
   );
 };

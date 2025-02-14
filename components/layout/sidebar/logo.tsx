@@ -23,7 +23,7 @@ export const SidebarLogo = ({ isSidebarCollapsed }: SidebarLogoType) => {
   };
 
   return (
-    <div className="p-5 border-b">
+    <div className="flex justify-center h-20 border-b">
       <div className="flex items-center justify-center">
         <Link
           href="/"

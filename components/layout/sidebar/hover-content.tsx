@@ -5,7 +5,7 @@ import { HoverCardContent } from "@/components/ui/hover-card";
 type ListItemHoverContentType = {
   imageSrc: string;
   name: string;
-  description: string;
+  description?: string;
 };
 
 const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({

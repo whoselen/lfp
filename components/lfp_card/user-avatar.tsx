@@ -14,7 +14,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 }) => {
   return (
     <div className="relative">
-      <Avatar className="border-1 border-border">
+      <Avatar className="border-1 border-border ring ring-secondary">
         <AvatarImage src={profilePictureSrc} alt={username} />
         <AvatarFallback>{username}</AvatarFallback>
       </Avatar>

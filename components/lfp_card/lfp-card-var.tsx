@@ -8,8 +8,10 @@ import UserRank from "./user-rank";
 import { UserAvatar } from "./user-avatar";
 import { Separator } from "../ui/separator";
 import { MessageButton } from "./message-button";
+import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 
-const LfpCard = () => {
+const LfpCardVar = () => {
   const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   const users = {
@@ -50,7 +52,7 @@ const LfpCard = () => {
   const ranks = {
     is_level_based: false,
     level_prefix: "AR",
-    name: "Ascendant II",
+    name: "Diamond II",
     iconUrl: "https://cdn3.emoji.gg/emojis/3939-valorant-diamond-2.png",
   };
 
@@ -84,52 +86,35 @@ const LfpCard = () => {
   const availableSlotLength = max_allowed_size - room_participants.length;
 
   return (
-    <article className="inline-block rounded-lg  border-border bg-background p-4 shadow-lg shadow-black/5 border  text-black min-w-[560px] max-w-[560px]">
+    <article className="inline-block rounded-lg border-border bg-background p-4 shadow-lg shadow-black/5 border  text-black max-w-[560px]">
       <div className="flex h-full w-full flex-row justify-between ">
-        <div className="flex flex-col items-center justify-between relative pr-2">
+        <div className="flex flex-col items-start justify-between relative rounded-lg border border-border py-2.5 px-3">
           <div className="flex flex-col items-center gap-4">
-            <UserAvatar
-              profilePictureSrc={users.avatar_url}
-              username={users.username}
-              isOnline={true}
-            />
-            <UserRank {...ranks} />
-          </div>
-          <div className="absolute bottom-0 left-4">
-            <MessageButton />
-          </div>
-          {/* <button className="w-min rounded-full bg-primary p-2 focus:outline-none focus:ring-2 focus:ring-gray-500 active:bg-[#0F0F0F]">
-            <MessageSquare className="h-3 w-3 text-white " />
-          </button> */}
-        </div>
-        <div className="ml-1 flex w-full max-w-full flex-col justify-between pl-2 sm:ml-2 sm:pl-[10px]">
-          <div className="flex flex-row">
-            <div className="flex w-full flex-col pr-2">
-              <div className="flex w-full items-start justify-between">
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex w-full flex-col items-start gap-1 md:flex-row md:items-center">
-                    <a href="/" title={users.username}>
-                      <span className="xs:text-base block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold">
-                        {users.nickname}
-                      </span>
-                    </a>
-                    <div className="flex items-start justify-start gap-1">
-                      <span className=" pt-[2px] text-[8px] italic">LFP</span>
-                      <span className="inline-block">
-                        <img
-                          draggable="false"
-                          src={games.img_url}
-                          alt="game-looking-for"
-                          className="ml-[2px] max-h-3 select-none object-cover sm:max-h-4"
-                        />
-                      </span>
-                    </div>
+            <div className="flex gap-2">
+              <UserAvatar
+                profilePictureSrc={users.avatar_url}
+                username={users.username}
+                isOnline={true}
+              />
+              <div className="flex w-full flex-col gap-2">
+                <div className="flex w-full flex-col items-start gap-1 md:flex-row md:items-center">
+                  <a href="/" title={users.username}>
+                    <span className="xs:text-base block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold">
+                      {users.nickname}
+                    </span>
+                  </a>
+                  <div className="flex items-start justify-start gap-1">
+                    <span className=" pt-[2px] text-[8px] italic">LFP</span>
+                    <span className="inline-block">
+                      <img
+                        draggable="false"
+                        src={games.img_url}
+                        alt="game-looking-for"
+                        className="ml-[2px] max-h-3 select-none object-cover sm:max-h-4"
+                      />
+                    </span>
                   </div>
                 </div>
-                {/* <Timer {is_upcoming} {schedule} /> */}
-                asd
-              </div>
-              <div className="mt-2 flex w-full justify-between items-center">
                 <div className="flex flex-row gap-1">
                   {users?.user_player_tags.map((tag) => (
                     <UserModeChip
@@ -140,7 +125,40 @@ const LfpCard = () => {
                     />
                   ))}
                 </div>
+              </div>
+            </div>
 
+            <div className="flex flex-col gap-2 items-center">
+              <UserRank {...ranks} />
+              <Badge className="bg-secondary text-secondary-foreground">
+                {ranks.name}
+              </Badge>
+            </div>
+
+            <Button
+              className="group rounded-full py-1 px-2.5 min-w-full"
+              variant="default"
+              aria-label="Message to user"
+            >
+              <div className="flex items-center">
+                <span className="text-xs">Send a DM</span>
+                <MessageSquare
+                  size={14}
+                  aria-hidden="true"
+                  className="me-1 ms-2"
+                />
+              </div>
+            </Button>
+          </div>
+        </div>
+        <div className="ml-1 flex w-full max-w-full flex-col justify-between pl-2 sm:ml-2 sm:pl-[10px]">
+          <div className="flex flex-row">
+            <div className="flex w-full pr-2">
+              <div className="flex flex-1 items-start justify-between">
+                {/* <Timer {is_upcoming} {schedule} /> */}
+                asd
+              </div>
+              <div className="mt-2 flex flex-0 justify-between">
                 <div className="flex w-max flex-wrap gap-[5px]">
                   {users?.user_tools.map((tool) => (
                     <UserAccessibility
@@ -193,4 +211,4 @@ const LfpCard = () => {
   );
 };
 
-export default LfpCard;
+export default LfpCardVar;
