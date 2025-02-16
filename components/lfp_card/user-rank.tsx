@@ -20,13 +20,13 @@ const UserRank: React.FC<UserRankProps> = ({
     <Tooltip>
       <TooltipTrigger>
         {isLevelBased ? (
-          <div className="flex h-min flex-col items-center justify-between gap-0">
-            <span className="font-os text-center text-xs font-semibold leading-3 text-white">
+          <div className="flex h-min flex-col items-center justify-between gap-3">
+            <span className="text-center font-semibold leading-3 text-foreground">
               {levelPrefix?.toUpperCase()}
             </span>
-            <span className="font-os text-2xl font-bold leading-6 text-white">
+            <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border border-border">
               {name}
-            </span>
+            </Badge>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1">

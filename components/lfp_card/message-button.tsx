@@ -13,7 +13,7 @@ export const MessageButton = () => {
         <MessageSquare
           size={14}
           aria-hidden="true"
-          className="group-hover:me-1 group-hover:ms-2 opacity-60 "
+          className="group-hover:me-1 group-hover:ms-2 opacity-60 text-foreground"
         />
       </div>
     </Button>

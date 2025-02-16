@@ -6,6 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { ListItem } from "./list-item";
 import { SidebarLogo } from "./logo";
 import SearchInput from "./search-input";
+import { ThemeToggler } from "@/components/common/theme-toggler";
 
 const communities = [
   {
@@ -111,13 +112,14 @@ export function Sidebar() {
             />
           ))}
         </div>
-        {!isCollapsed && (
-          <div className="border-t p-4">
+        <div className="flex justify-between items-center border-t p-4">
+          {!isCollapsed && (
             <p className="text-xs text-muted-foreground">
               {communities.length} communities available
             </p>
-          </div>
-        )}
+          )}
+          <ThemeToggler />
+        </div>
       </div>
       <div
         className="absolute top-0 right-0 w-1 h-full cursor-col-resize bg-primary/10 hover:bg-primary/20"

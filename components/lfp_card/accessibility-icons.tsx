@@ -4,7 +4,7 @@ interface AccessibilityIconsProps {
   name: string;
 }
 
-const iconClass = "h-3 w-3 text-white";
+const iconClass = "h-3 w-3";
 
 const AccessibilityIcons: React.FC<AccessibilityIconsProps> = ({ name }) => {
   return (

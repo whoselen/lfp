@@ -26,7 +26,7 @@ export function ListItem({
           }`}
           variant="ghost"
         >
-          <Avatar className="h-12 w-12 flex-shrink-0">
+          <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-border">
             <AvatarImage
               src={avatarSrc}
               alt={`${name} logo`}

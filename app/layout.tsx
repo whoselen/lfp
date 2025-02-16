@@ -1,3 +1,6 @@
+import { ThemeProvider } from "@/components/providers/theme-provider";
+
+import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
 import { Manrope, Silkscreen } from "next/font/google";
@@ -39,7 +42,15 @@ export default function RootLayout({
       <body
         className={`${manrope.variable} ${silkScreen.variable} antialiased`}
       >
-        <TooltipProvider>{children}</TooltipProvider>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
+        <Toaster />
       </body>
     </html>
   );

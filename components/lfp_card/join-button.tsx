@@ -1,25 +1,25 @@
+import { ArrowRight } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
 import React from "react";
 import { Button } from "../ui/button";
-import { ArrowRight } from "lucide-react";
-import { Avatar, AvatarFallback } from "../ui/avatar";
-import { AvatarImage } from "@radix-ui/react-avatar";
 
 interface JoinButtonProps {
   roomId: string;
 }
 
 const JoinButton: React.FC<JoinButtonProps> = ({ roomId }) => {
-  // const history = useHistory();
+  const router = useRouter();
+  const pathname = usePathname();
 
-  const routeToPage = (route: string) => {
-    // history.push(`/${route}`);
+  const handleJoin = () => {
+    router.push(`${pathname}?roomId=${roomId}`);
   };
 
   return (
     <Button
       className="relative group rounded-full shadow shadow-black/5"
       type="button"
-      onClick={() => routeToPage(`room/${roomId}`)}
+      onClick={handleJoin}
     >
       JOIN
       <ArrowRight

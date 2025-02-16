@@ -7,8 +7,10 @@ import { useState } from "react";
 
 export function SegmentedControl({
   setActiveTab,
+  activeTab,
 }: {
   setActiveTab: (value: string | null) => void;
+  activeTab: string | null;
 }) {
   const TABS = [
     {
@@ -38,10 +40,10 @@ export function SegmentedControl({
   ];
 
   return (
-    <div className="py-4 w-min">
-      <div className="flex w-full space-x-2 rounded-full bg-muted py-1 px-1.5">
+    <div className="py-4 flex flex-grow justify-center">
+      <div className="space-x-2 rounded-full bg-muted py-1 px-1.5">
         <AnimatedBackground
-          defaultValue={TABS[0].value}
+          defaultValue={activeTab}
           className="rounded-full bg-primary"
           transition={{
             type: "spring",
