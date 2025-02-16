@@ -43,7 +43,7 @@ export function SegmentedControl({
     <div className="py-4 flex flex-grow justify-center">
       <div className="space-x-2 rounded-full bg-muted py-1 px-1.5">
         <AnimatedBackground
-          defaultValue={activeTab}
+          defaultValue={activeTab || "lfp-feed"}
           className="rounded-full bg-primary"
           transition={{
             type: "spring",

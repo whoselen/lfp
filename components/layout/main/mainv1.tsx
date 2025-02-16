@@ -144,13 +144,13 @@ export function Mail({
               </form>
             </div>
             <TabsContent value="all" className="m-0">
-              <div className="flex flex-col gap-2">
+              {/* <div className="flex flex-col gap-2">
                 <LfpCard />
                 <LfpCard />
                 <LfpCard />
                 <LfpCard />
                 <LfpCard />
-              </div>
+              </div> */}
             </TabsContent>
             <TabsContent value="unread" className="m-0">
               {/* <MailList items={mails.filter((item) => !item.read)} /> */}
