@@ -61,7 +61,8 @@ export async function signup(state: FormState, formData: FormData) {
     };
   }
   return {
-    message: "Account has been created",
+    message:
+      "Registration successful! Please check your email to verify your account.",
   };
 }
 

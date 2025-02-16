@@ -18,6 +18,7 @@ const SessionContext = createContext<Session | null>(null);
 const UserContext = ({ children }: { children: ReactNode }) => {
   const supabaseClient = createClient();
   const [session, setSession] = useState<Session | null>(null);
+
   useEffect(() => {
     const {
       data: { subscription },
@@ -32,6 +33,7 @@ const UserContext = ({ children }: { children: ReactNode }) => {
       subscription.unsubscribe();
     };
   }, []);
+
   return (
     <SessionContext.Provider value={session}>
       {children}
