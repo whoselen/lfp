@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import type { Metadata } from "next";
 import { Manrope, Silkscreen } from "next/font/google";
 import "./globals.css";
+import UserContext from "@/components/context/user-context";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -48,7 +49,9 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <TooltipProvider>{children}</TooltipProvider>
+          <UserContext>
+            <TooltipProvider>{children}</TooltipProvider>
+          </UserContext>
         </ThemeProvider>
         <Toaster />
       </body>

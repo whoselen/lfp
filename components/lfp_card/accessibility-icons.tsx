@@ -1,4 +1,5 @@
-import { Headphones, Headset, Mic, Database, Monitor } from "lucide-react";
+import { Headphones, Headset, Mic, Monitor } from "lucide-react";
+import { FaDiscord } from "react-icons/fa6";
 
 interface AccessibilityIconsProps {
   name: string;
@@ -11,7 +12,7 @@ const AccessibilityIcons: React.FC<AccessibilityIconsProps> = ({ name }) => {
     <span>
       {name === "headset" && <Headset className={iconClass} />}
       {name === "microphone" && <Mic className={iconClass} />}
-      {name === "discord" && <Database className={iconClass} />}
+      {name === "discord" && <FaDiscord className={iconClass} />}
       {name === "headphones" && <Headphones className={iconClass} />}
       {name === "pc" && <Monitor className={iconClass} />}
     </span>

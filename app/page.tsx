@@ -14,8 +14,6 @@ export default async function Home() {
   const defaultLayout = layout ? JSON.parse(layout.value) : undefined;
   const defaultCollapsed = collapsed ? JSON.parse(collapsed.value) : undefined;
 
-  console.log(JSON.stringify(data.user, null, 2));
-
   return (
     <MainLayout user={data?.user} />
     // <Mail

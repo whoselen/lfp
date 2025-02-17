@@ -1,12 +1,13 @@
 "use server";
 
-import { revalidatePath } from "next/cache";
+import { FormState } from "@/lib/definitions";
+import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
 
-import { createClient } from "@/utils/supabase/server";
-import { FormState } from "@/lib/definitions";
-
-export async function login(state: FormState, formData: FormData) {
+export async function login(
+  state: FormState,
+  formData: FormData
+): Promise<FormState> {
   const supabase = await createClient();
 
   // type-casting here for convenience
@@ -24,26 +25,23 @@ export async function login(state: FormState, formData: FormData) {
     };
   }
 
-  try {
-    const { error } = await supabase.auth.signInWithPassword(data);
+  const { error } = await supabase.auth.signInWithPassword(data);
 
-    if (error) {
-      return {
-        errors: error.message,
-      };
-    }
-
+  if (error) {
     return {
-      message: "Authenticated",
-    };
-  } catch (err) {
-    return {
-      errors: "An error occurred. Please try again.",
+      errors: error.message,
     };
   }
+
+  return {
+    message: "Welcome!",
+  };
 }
 
-export async function signup(state: FormState, formData: FormData) {
+export async function signup(
+  state: FormState,
+  formData: FormData
+): Promise<FormState> {
   const supabase = await createClient();
 
   // type-casting here for convenience
@@ -76,7 +74,6 @@ export async function signout(state: FormState) {
       errors: error.message,
     };
   }
-  return {
-    message: "Until next time!",
-  };
+
+  return redirect("/");
 }

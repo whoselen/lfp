@@ -1,29 +1,31 @@
 "use client";
 
-import { useRandomColor } from "@/hooks/useRandomColor";
+import { cn } from "@/lib/utils";
+import { useAtom } from "jotai";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { appLogoCharacterIndexAtom, randomColor } from "./atom";
 
 const PROJECT_NAME = "ASAP";
 
-type SidebarLogoType = {
-  isSidebarCollapsed: boolean;
+type AppLogoType = {
+  isSidebarCollapsed?: boolean;
+  className?: string;
 };
 
-export const SidebarLogo = ({ isSidebarCollapsed }: SidebarLogoType) => {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [randomColor, refreshRandomColor] = useRandomColor();
-
-  useEffect(() => {
-    refreshRandomColor();
-  }, [activeIndex]);
+export const AppLogo = ({ isSidebarCollapsed, className }: AppLogoType) => {
+  const [activeIndex, setActiveIndex] = useAtom(appLogoCharacterIndexAtom);
+  const [randColor, refreshRandomColor] = useAtom(randomColor);
 
   const handleCharacterHover = (index: number) => () => {
+    if (activeIndex === index) {
+      return;
+    }
     setActiveIndex(index);
+    refreshRandomColor();
   };
 
   return (
-    <div className="flex justify-center h-20 border-b">
+    <div className={cn("flex justify-center h-20", className)}>
       <div className="flex items-center justify-center">
         <Link
           href="/"
@@ -50,7 +52,7 @@ export const SidebarLogo = ({ isSidebarCollapsed }: SidebarLogoType) => {
               className={`absolute -bottom-1 w-2 h-2 rounded-full transition-all duration-300 ease-in-out [transition-timing-function:cubic-bezier(0.68,-0.6,0.32,1.6)]`}
               style={{
                 left: `calc(${(activeIndex + 1) * 1}ch - 0.69ch)`,
-                backgroundColor: randomColor,
+                backgroundColor: randColor,
               }}
             />
           </div>

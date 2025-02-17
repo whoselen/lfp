@@ -24,7 +24,7 @@ const UserRank: React.FC<UserRankProps> = ({
             <span className="text-center font-semibold leading-3 text-foreground">
               {levelPrefix?.toUpperCase()}
             </span>
-            <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border border-border">
+            <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border-none">
               {name}
             </Badge>
           </div>

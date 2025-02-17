@@ -53,6 +53,11 @@ export const rooms = [
         },
         {
           tools: {
+            name: "discord",
+          },
+        },
+        {
+          tools: {
             name: "headset",
           },
         },

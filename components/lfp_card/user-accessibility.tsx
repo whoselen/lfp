@@ -15,7 +15,7 @@ const UserAccessibility: React.FC<UserAccessibilityProps> = ({ name }) => {
         <Badge
           className={clsx(
             "max-h-min px-2 py-1",
-            name === "discord" ? "bg-[#5367F7]" : "bg-primary"
+            name === "discord" ? "bg-[#5367F7] text-white" : "bg-primary"
           )}
         >
           <AccessibilityIcons name={name} />

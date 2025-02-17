@@ -14,7 +14,7 @@ const UserModeChip: React.FC<UserModeChipProps> = ({
 }) => {
   return (
     <Badge
-      className="text-[10px] font-light text-white max-h-min bg-muted text-muted-foreground"
+      className="text-[10px] font-light text-white max-h-min bg-muted text-secondary-foreground border border-border"
       // className={`h-min w-fit max-w-chip-1 select-none rounded-lg px-2 py-[3px] text-[9px] font-light leading-none
       //           bg-gray-500 text-main-gray text-white
       //           ${backgroundColor ? `bg-[#${backgroundColor}]` : ""}

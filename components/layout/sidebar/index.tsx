@@ -4,9 +4,9 @@ import { Search } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import { ListItem } from "./list-item";
-import { SidebarLogo } from "./logo";
 import SearchInput from "./search-input";
 import { ThemeToggler } from "@/components/common/theme-toggler";
+import { AppLogo } from "@/components/common/app-logo";
 
 const communities = [
   {
@@ -92,7 +92,7 @@ export function Sidebar() {
       style={{ width: `${sidebarWidth}px` }}
     >
       <div className="h-full overflow-hidden flex flex-col">
-        <SidebarLogo isSidebarCollapsed={isCollapsed} />
+        <AppLogo isSidebarCollapsed={isCollapsed} className="border-b" />
 
         <div className="px-4 py-2 flex items-center justify-between">
           {isCollapsed ? (

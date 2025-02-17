@@ -74,7 +74,7 @@ export default function MainLayout({ user }: { user: User | null }) {
         <div className="mx-auto">
           <div className="flex justify-center w-full">
             <div className="flex flex-col w-full">
-              <nav className="flex justify-between items-center px-6 h-20 border-b">
+              <nav className="flex justify-between items-center px-20 h-20 border-b">
                 <SegmentedControl
                   activeTab={activeTab}
                   setActiveTab={setActiveTab}
