@@ -12,7 +12,7 @@ import {
 import { buttonVariants } from "@/components/ui/button";
 import { ListItem } from "../sidebar/list-item";
 import SearchInput from "../sidebar/search-input";
-import { SidebarLogo } from "../sidebar/logo";
+import { AppLogo } from "@/components/common/app-logo";
 
 interface NavProps {
   isCollapsed: boolean;
@@ -26,7 +26,7 @@ interface NavProps {
 export function Nav({ communities, isCollapsed }: NavProps) {
   return (
     <div data-collapsed={isCollapsed} className="group flex flex-col gap-2">
-      <SidebarLogo isSidebarCollapsed={isCollapsed} />
+      <AppLogo isSidebarCollapsed={isCollapsed} />
       <div className="px-4 flex items-center justify-between">
         {isCollapsed ? (
           ""
