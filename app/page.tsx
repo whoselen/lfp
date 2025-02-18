@@ -1,8 +1,6 @@
 import MainLayout from "@/components/layout/main";
-import { Mail } from "@/components/layout/main/mainv1";
-import Image from "next/image";
-import { cookies } from "next/headers";
 import { createClient } from "@/utils/supabase/server";
+import { cookies } from "next/headers";
 
 export default async function Home() {
   const layout = (await cookies()).get("react-resizable-panels:layout:mail");

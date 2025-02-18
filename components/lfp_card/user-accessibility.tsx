@@ -1,11 +1,12 @@
-import React from "react";
-import AccessibilityIcons from "./accessibility-icons";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
-import { Badge } from "../ui/badge";
+import { AccessibilityToolKey } from "@/lib/constants";
 import clsx from "clsx";
+import React from "react";
+import { Badge } from "../ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
+import AccessibilityIcons from "./accessibility-icons";
 
 interface UserAccessibilityProps {
-  name: string;
+  name: AccessibilityToolKey;
 }
 
 const UserAccessibility: React.FC<UserAccessibilityProps> = ({ name }) => {

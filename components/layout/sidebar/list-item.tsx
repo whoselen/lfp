@@ -5,34 +5,34 @@ import { ChevronRight } from "lucide-react";
 import ListItemHoverContent from "./hover-content";
 
 interface ListItemProps {
-  name: string;
-  description?: string;
-  avatarSrc: string;
   isCollapsed: boolean;
+  name: string | null;
+  description: string | null;
+  image_url: string | null;
 }
 
 export function ListItem({
   name,
   description,
-  avatarSrc,
+  image_url,
   isCollapsed,
 }: ListItemProps) {
   return (
     <HoverCard openDelay={400}>
       <HoverCardTrigger asChild>
         <Button
-          className={`group h-auto w-full gap-4 py-3 text-left ${
+          className={`group h-auto w-full gap-4 py-3 text-left rounded-none ${
             isCollapsed ? "justify-center" : ""
           }`}
           variant="ghost"
         >
           <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-border">
             <AvatarImage
-              src={avatarSrc}
+              src={image_url || ""}
               alt={`${name} logo`}
-              className="object-cover bg-black"
+              className="object-cover"
             />
-            <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{name?.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
 
           {!isCollapsed && (
@@ -54,7 +54,7 @@ export function ListItem({
         </Button>
       </HoverCardTrigger>
       <ListItemHoverContent
-        imageSrc={avatarSrc}
+        imageSrc={image_url || ""}
         name={name}
         description={description}
       />

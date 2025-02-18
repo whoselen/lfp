@@ -20,7 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import MultipleSelector, { Option } from "@/components/ui/multiselect";
+import MultipleSelector from "@/components/ui/multiselect";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
@@ -32,26 +32,26 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { DateTimePicker } from "@/components/ui/time-picker";
-import { cn } from "@/lib/utils";
 import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import clsx from "clsx";
-import { ChevronLeft, Headphones, Headset, Speaker } from "lucide-react";
+import { ChevronLeft } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useSearchParams } from "next/navigation";
 import { useId, useState } from "react";
 
-import { Sidebar } from "../sidebar";
-import { SegmentedControl } from "./nav-bar";
-import { rooms } from "./rooms";
+import UserDropdown from "@/components/auth/user-dropdown";
+import Square from "@/components/ui/square";
+import Notification from "@/components/user/notification";
 import {
   accessibility_tools,
   frameworks,
   player_tags,
 } from "@/lib/placeholder_datas";
-import Square from "@/components/ui/square";
 import { User } from "@supabase/supabase-js";
-import UserDropdown from "@/components/auth/user-dropdown";
-import Notification from "@/components/user/notification";
+import { Sidebar } from "../sidebar";
+import { SegmentedControl } from "./nav-bar";
+import { rooms } from "./rooms";
+import RecentRooms from "./recent-rooms";
 
 export default function MainLayout({ user }: { user: User | null }) {
   const [activeTab, setActiveTab] = useState<string | null>("lfp-feed");
@@ -112,23 +112,7 @@ export default function MainLayout({ user }: { user: User | null }) {
                         backdropFilter: "blur(20px)",
                       }}
                     >
-                      <div className="w-full flex gap-4 justify-center mx-4 pr-4">
-                        <div className="flex flex-col space-y-2 last:mb-4">
-                          {rooms.map((room) => (
-                            <div
-                              key={room.id}
-                              className={clsx(
-                                "hover:blur-none",
-                                activeRoomId &&
-                                  activeRoomId !== room.id &&
-                                  "blur-[2px]"
-                              )}
-                            >
-                              <LfpCard {...room} />
-                            </div>
-                          ))}
-                        </div>
-                      </div>
+                      <RecentRooms />
                     </ScrollArea>
                   </div>
 

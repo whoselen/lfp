@@ -6,6 +6,7 @@ import type { Metadata } from "next";
 import { Manrope, Silkscreen } from "next/font/google";
 import "./globals.css";
 import UserContext from "@/components/context/user-context";
+import { ReactQueryClientProvider } from "@/components/providers/react-query-client-provider";
 
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
@@ -39,22 +40,24 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${manrope.variable} ${silkScreen.variable} antialiased`}
-      >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="system"
-          enableSystem
-          disableTransitionOnChange
+    <ReactQueryClientProvider>
+      <html lang="en">
+        <body
+          className={`${manrope.variable} ${silkScreen.variable} antialiased`}
         >
-          <UserContext>
-            <TooltipProvider>{children}</TooltipProvider>
-          </UserContext>
-        </ThemeProvider>
-        <Toaster />
-      </body>
-    </html>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="system"
+            enableSystem
+            disableTransitionOnChange
+          >
+            <UserContext>
+              <TooltipProvider>{children}</TooltipProvider>
+            </UserContext>
+          </ThemeProvider>
+          <Toaster />
+        </body>
+      </html>
+    </ReactQueryClientProvider>
   );
 }

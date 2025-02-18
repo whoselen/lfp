@@ -18,7 +18,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
-import { createClient } from "@/utils/supabase/client";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import Avatar from "./_components/avatar";
@@ -26,6 +25,7 @@ import { Check, LoaderCircle, X } from "lucide-react";
 import { useUserStore } from "@/stores/user-store";
 import { Value } from "@radix-ui/react-select";
 import { useDebounceValue } from "usehooks-ts";
+import useSupabaseBrowser from "@/utils/supabase/client";
 
 const profileFormSchema = z.object({
   username: z
@@ -43,7 +43,7 @@ const profileFormSchema = z.object({
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
 export function ProfileForm() {
-  const supabase = createClient();
+  const supabase = useSupabaseBrowser();
   const user = useUser();
   const username = useUserStore((state) => state.username) || "";
   const bio = useUserStore((state) => state.bio) || "";
@@ -111,6 +111,9 @@ export function ProfileForm() {
 
   async function updateAvatar(url: string) {
     try {
+      if (!user?.id) {
+        return;
+      }
       const { error } = await supabase.from("profiles").upsert({
         id: user?.id,
         avatar_url: url,
@@ -137,6 +140,9 @@ export function ProfileForm() {
   }) {
     try {
       //   setLoading(true)
+      if (!user?.id) {
+        return;
+      }
 
       const { error } = await supabase.from("profiles").upsert({
         id: user?.id,

@@ -4,8 +4,8 @@ import { HoverCardContent } from "@/components/ui/hover-card";
 
 type ListItemHoverContentType = {
   imageSrc: string;
-  name: string;
-  description?: string;
+  name: string | null;
+  description?: string | null;
 };
 
 const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({
@@ -17,13 +17,13 @@ const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({
     <HoverCardContent>
       <div className="space-y-3">
         <div className="flex items-center gap-3">
-          <Avatar className="h-12 w-12 flex-shrink-0">
+          <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-border">
             <AvatarImage
               src={imageSrc}
               alt={`${name} logo`}
-              className="object-cover bg-black"
+              className="object-cover"
             />
-            <AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
+            <AvatarFallback>{name?.slice(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
 
           <div className="space-y-0.5">
@@ -42,7 +42,7 @@ const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({
                   className="object-cover ring-2 ring-background"
                 />
                 <AvatarFallback>
-                  {name.slice(0, 2).toUpperCase()}
+                  {name?.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <Avatar className="h-8 w-8 flex-shrink-0  ring-2 ring-background">
@@ -52,7 +52,7 @@ const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({
                   className="object-cover ring-2 ring-background"
                 />
                 <AvatarFallback>
-                  {name.slice(0, 2).toUpperCase()}
+                  {name?.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
               <Avatar className="h-8 w-8 flex-shrink-0  ring-2 ring-background">
@@ -62,7 +62,7 @@ const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({
                   className="object-cover ring-2 ring-background"
                 />
                 <AvatarFallback>
-                  {name.slice(0, 2).toUpperCase()}
+                  {name?.slice(0, 2).toUpperCase()}
                 </AvatarFallback>
               </Avatar>
             </div>

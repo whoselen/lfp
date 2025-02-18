@@ -1,4 +1,5 @@
 "use client";
+
 import { Button } from "@/components/ui/button";
 import { Search } from "lucide-react";
 import type React from "react";
@@ -7,8 +8,11 @@ import { ListItem } from "./list-item";
 import SearchInput from "./search-input";
 import { ThemeToggler } from "@/components/common/theme-toggler";
 import { AppLogo } from "@/components/common/app-logo";
+import useSupabaseBrowser from "@/utils/supabase/client";
+import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import { getGames } from "@/queries/games";
 
-const communities = [
+const ggggg = [
   {
     name: "Dota 2",
     description: "The best MOBA enjoyers",
@@ -46,6 +50,10 @@ const MAX_SIDEBAR_WIDTH = 320;
 const COLLAPSE_THRESHOLD = 140;
 
 export function Sidebar() {
+  const supabase = useSupabaseBrowser();
+
+  const { data: games, isLoading, isError } = useQuery(getGames(supabase));
+
   const [sidebarWidth, setSidebarWidth] = useState(MAX_SIDEBAR_WIDTH);
   const [isDragging, setIsDragging] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
@@ -104,18 +112,18 @@ export function Sidebar() {
           )}
         </div>
         <div className="overflow-y-auto flex-1">
-          {communities.map((community) => (
+          {(games || []).map((community) => (
             <ListItem
-              key={community.name}
-              {...community}
+              key={community.id}
               isCollapsed={isCollapsed}
+              {...community}
             />
           ))}
         </div>
         <div className="flex justify-between items-center border-t p-4">
           {!isCollapsed && (
             <p className="text-xs text-muted-foreground">
-              {communities.length} communities available
+              {games?.length} communities available
             </p>
           )}
           <ThemeToggler />

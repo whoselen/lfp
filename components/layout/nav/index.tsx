@@ -17,9 +17,9 @@ import { AppLogo } from "@/components/common/app-logo";
 interface NavProps {
   isCollapsed: boolean;
   communities: {
-    title: string;
+    name: string;
     description?: string;
-    avatarSrc: string;
+    image_url: string;
   }[];
 }
 
@@ -42,19 +42,19 @@ export function Nav({ communities, isCollapsed }: NavProps) {
           isCollapsed ? (
             <Link key={index} href="#">
               <ListItem
-                name={link.title}
-                description={link.description}
-                avatarSrc={link.avatarSrc}
+                name={link.name}
+                description={link.description || ""}
+                image_url={link.image_url}
                 isCollapsed={true}
               />
-              <span className="sr-only">{link.title}</span>
+              <span className="sr-only">{link.name}</span>
             </Link>
           ) : (
             <Link key={index} href="#">
               <ListItem
-                name={link.title}
-                description={link.description}
-                avatarSrc={link.avatarSrc}
+                name={link.name}
+                description={link.description || ""}
+                image_url={link.image_url}
                 isCollapsed={false}
               />
             </Link>

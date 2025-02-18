@@ -18,9 +18,6 @@ import {
   FormMessage,
 } from "../ui/form";
 import { PasswordInput } from "../ui/password-input";
-import { useUser } from "../context/user-context";
-import { createClient } from "@/utils/supabase/client";
-import { useUserStore } from "@/stores/user-store";
 
 const formSchema = z.object({
   email: z

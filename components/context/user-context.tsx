@@ -1,7 +1,8 @@
 "use client";
 
 import { useUserStore } from "@/stores/user-store";
-import { createClient } from "@/utils/supabase/client";
+import useSupabaseBrowser from "@/utils/supabase/client";
+
 import { AuthSession } from "@supabase/supabase-js";
 import {
   createContext,
@@ -14,7 +15,7 @@ import {
 const SessionContext = createContext<AuthSession | null>(null);
 
 const UserContext = ({ children }: { children: ReactNode }) => {
-  const supabase = createClient();
+  const supabase = useSupabaseBrowser();
   const [session, setSession] = useState<AuthSession | null>(null);
   const setUserInfo = useUserStore((state) => state.setUserInfo);
   const clearUserInfo = useUserStore((state) => state.clearUserInfo);

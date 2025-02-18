@@ -1,21 +1,49 @@
-import { Headphones, Headset, Mic, Monitor } from "lucide-react";
-import { FaDiscord } from "react-icons/fa6";
+import { AccessibilityToolKey } from "@/lib/constants";
+import { cn } from "@/lib/utils";
+import clsx from "clsx";
+import {
+  Gamepad,
+  Headphones,
+  Headset,
+  Monitor,
+  TabletSmartphone,
+} from "lucide-react";
+import React, { cloneElement, JSX } from "react";
+import { FaDiscord, FaMicrophone } from "react-icons/fa6";
 
-interface AccessibilityIconsProps {
-  name: string;
+export interface AccessibilityIconsProps {
+  name: AccessibilityToolKey;
+  className?: string;
 }
 
 const iconClass = "h-3 w-3";
 
-const AccessibilityIcons: React.FC<AccessibilityIconsProps> = ({ name }) => {
+const iconMap: Record<AccessibilityToolKey, JSX.Element> = {
+  headset: <Headset />,
+  "mic-only": <FaMicrophone />,
+  discord: <FaDiscord />,
+  "headphone-only": <Headphones />,
+  pc: <Monitor />,
+  console: <Gamepad />,
+  mobile: <TabletSmartphone />,
+};
+
+const AccessibilityIcons: React.FC<AccessibilityIconsProps> = ({
+  name,
+  className,
+}) => {
+  const Icon = iconMap[name];
+
   return (
-    <span>
-      {name === "headset" && <Headset className={iconClass} />}
-      {name === "microphone" && <Mic className={iconClass} />}
-      {name === "discord" && <FaDiscord className={iconClass} />}
-      {name === "headphones" && <Headphones className={iconClass} />}
-      {name === "pc" && <Monitor className={iconClass} />}
-    </span>
+    <>
+      {Icon &&
+        cloneElement(Icon, {
+          className: clsx(
+            cn(iconClass, className),
+            name === "discord" && "text-[#7289da]"
+          ),
+        })}
+    </>
   );
 };
 

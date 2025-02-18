@@ -7,6 +7,12 @@ import UserAccessibility from "./user-accessibility";
 import { UserAvatar } from "./user-avatar";
 import UserModeChip from "./user-mode-chip";
 import UserRank from "./user-rank";
+import { AccessibilityToolKey } from "@/lib/constants";
+import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import useSupabaseBrowser from "@/utils/supabase/client";
+import { getUserById } from "@/queries/users";
+import UserCustomTags from "./user-custom-tags";
+import UserAccessibilityTools from "./user-accessibility-tools";
 
 export interface LfpCardProps {
   max_allowed_size: number;
@@ -16,41 +22,32 @@ export interface LfpCardProps {
       avatar_url: string;
     };
   }>;
-  users: {
-    avatar_url: string;
-    username: string;
-    nickname: string;
-    user_player_tags: Array<{
-      player_tags: {
-        title: string;
-        background_hex_code: string;
-        text_hex_code: string;
-      };
-    }>;
-    user_tools: Array<{
-      tools: {
-        name: string;
-      };
-    }>;
-  };
-  games: {
+
+  game: {
     img_url: string;
   };
-  ranks: any;
+  rank_id: number;
   title: string;
   description: string;
-  id: string;
+  id: number;
+  createdUserId: string;
+
+  customTagsIds: number[];
+  accessibilityToolsIds: number[];
 }
 
 const LfpCard: React.FC<LfpCardProps> = ({
   max_allowed_size,
   room_participants,
-  users,
-  games,
-  ranks,
+
+  game,
+  rank_id,
   title,
   description,
   id,
+  createdUserId,
+  customTagsIds,
+  accessibilityToolsIds,
 }) => {
   const [detailsExpanded, setDetailsExpanded] = useState(false);
 
@@ -59,17 +56,25 @@ const LfpCard: React.FC<LfpCardProps> = ({
 
   const availableSlotLength = max_allowed_size - room_participants.length;
 
+  const supabase = useSupabaseBrowser();
+
+  const { data: user, isLoading } = useQuery(
+    getUserById(supabase, createdUserId)
+  );
+
+  console.log(user?.avatar_url);
+
   return (
     <article className="inline-block rounded-lg  border-border bg-background p-4 shadow-lg shadow-black/5 border text-black min-w-[560px]">
       <div className="flex h-full w-full flex-row justify-between ">
         <div className="flex flex-col items-center justify-between relative pr-2">
           <div className="flex flex-col items-center gap-4 w-16">
             <UserAvatar
-              profilePictureSrc={users.avatar_url}
-              username={users.username}
+              profilePictureSrc={user?.avatar_url ?? ""}
+              username={user?.username ?? ""}
               isOnline={true}
             />
-            <UserRank {...ranks} />
+            <UserRank rankId={rank_id} />
           </div>
           <div className="absolute bottom-0 left-4">
             <MessageButton />
@@ -84,9 +89,9 @@ const LfpCard: React.FC<LfpCardProps> = ({
               <div className="flex w-full items-start justify-between">
                 <div className="flex w-full flex-col gap-2">
                   <div className="flex w-full flex-col items-start gap-1 md:flex-row md:items-center">
-                    <a href="/" title={users.username}>
+                    <a href="/" title={user?.username ?? ""}>
                       <span className="xs:text-base block overflow-hidden text-ellipsis whitespace-nowrap text-sm font-semibold text-foreground">
-                        {users.nickname}
+                        {user?.username || ""}
                       </span>
                     </a>
                     <div className="flex items-start justify-start gap-1">
@@ -96,7 +101,7 @@ const LfpCard: React.FC<LfpCardProps> = ({
                       <span className="inline-block">
                         <img
                           draggable="false"
-                          src={games.img_url}
+                          src={game.img_url}
                           alt="game-looking-for"
                           className="ml-[2px] max-h-3 select-none object-cover sm:max-h-4"
                         />
@@ -109,23 +114,11 @@ const LfpCard: React.FC<LfpCardProps> = ({
               </div>
               <div className="mt-2 flex w-full justify-between items-center">
                 <div className="flex flex-row gap-1">
-                  {users?.user_player_tags.map((tag) => (
-                    <UserModeChip
-                      key={tag.player_tags.title}
-                      title={tag?.player_tags?.title}
-                      backgroundColor={tag?.player_tags?.background_hex_code}
-                      textColor={tag?.player_tags?.text_hex_code}
-                    />
-                  ))}
+                  <UserCustomTags ids={customTagsIds} />
                 </div>
 
                 <div className="flex w-max flex-wrap gap-[5px]">
-                  {users?.user_tools.map((tool) => (
-                    <UserAccessibility
-                      key={tool.tools.name}
-                      name={tool?.tools?.name}
-                    />
-                  ))}
+                  <UserAccessibilityTools ids={accessibilityToolsIds} />
                 </div>
               </div>
             </div>
@@ -162,7 +155,7 @@ const LfpCard: React.FC<LfpCardProps> = ({
                   />
                 </div>
               </div>
-              <JoinButton roomId={id} />
+              <JoinButton roomId={String(id)} />
             </div>
           </div>
         </div>

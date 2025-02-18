@@ -1,46 +1,49 @@
+import { getRankById } from "@/queries/games";
+import useSupabaseBrowser from "@/utils/supabase/client";
+import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
 import React from "react";
-import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import { Tooltip, TooltipContent, TooltipTrigger } from "../ui/tooltip";
 
 interface UserRankProps {
-  isLevelBased?: boolean;
-  levelPrefix?: string;
-  name?: string;
-  iconUrl?: string;
+  rankId: number;
 }
 
-const UserRank: React.FC<UserRankProps> = ({
-  isLevelBased = false,
-  levelPrefix = "AR",
-  name = "20",
-  iconUrl = "https://static.wikia.nocookie.net/valorant/images/0/0b/Immortal_3_Rank.png/revision/latest?cb=20200623203617",
-}) => {
+const UserRank: React.FC<UserRankProps> = ({ rankId }) => {
+  const supabase = useSupabaseBrowser();
+
+  const {
+    data: rank,
+    isLoading,
+    error,
+  } = useQuery(getRankById(supabase, rankId));
+
   return (
     <Tooltip>
       <TooltipTrigger>
-        {isLevelBased ? (
+        {rank?.rating_prefix ? (
           <div className="flex h-min flex-col items-center justify-between gap-3">
             <span className="text-center font-semibold leading-3 text-foreground">
-              {levelPrefix?.toUpperCase()}
+              {rank?.rating_prefix?.toUpperCase()}
             </span>
             <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border-none">
-              {name}
+              {rank.name}
             </Badge>
           </div>
         ) : (
           <div className="flex flex-col items-center gap-1">
             <Avatar className="rounded-none">
-              <AvatarImage src={iconUrl} alt={name} />
-              <AvatarFallback>{name}</AvatarFallback>
+              <AvatarImage src={rank?.image_url ?? ""} alt={rank?.name} />
+              <AvatarFallback>{rank?.name}</AvatarFallback>
             </Avatar>
             <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border border-border">
-              {name}
+              {rank?.name}
             </Badge>
           </div>
         )}
       </TooltipTrigger>
-      <TooltipContent>{name}</TooltipContent>
+      <TooltipContent>{rank?.name}</TooltipContent>
     </Tooltip>
   );
 };

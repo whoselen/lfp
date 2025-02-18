@@ -78,7 +78,7 @@ export function Mail({
           )}
         >
           {/* <Sidebar /> */}
-          <Nav
+          {/* <Nav
             isCollapsed={isCollapsed}
             communities={[
               {
@@ -112,7 +112,7 @@ export function Mail({
                   "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHC99xWZ-J68zo80KcsGmBo5zLFsIiaHlnfw&s",
               },
             ]}
-          />
+          /> */}
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={defaultLayout[1]} minSize={30}>

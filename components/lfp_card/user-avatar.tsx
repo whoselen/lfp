@@ -1,5 +1,6 @@
 import clsx from "clsx";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { getAvatarUrl } from "@/lib/utils";
 
 type UserAvatarProps = {
   username: string;
@@ -24,7 +25,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
           size === "lg" && "size-16"
         )}
       >
-        <AvatarImage src={profilePictureSrc} alt={username} />
+        <AvatarImage src={getAvatarUrl(profilePictureSrc)} alt={username} />
         <AvatarFallback>{username}</AvatarFallback>
       </Avatar>
       <span

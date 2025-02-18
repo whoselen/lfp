@@ -1,7 +1,8 @@
 "use client";
 
 import { useUser } from "@/components/context/user-context";
-import { createClient } from "@/utils/supabase/client";
+import useSupabaseBrowser from "@/utils/supabase/client";
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -11,7 +12,7 @@ interface UseImageUploadProps {
 }
 
 export function useImageUpload({ onUpload, url }: UseImageUploadProps = {}) {
-  const supabase = createClient();
+  const supabase = useSupabaseBrowser();
   const user = useUser();
   const previewRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
