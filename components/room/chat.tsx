@@ -1,4 +1,8 @@
+import { Send, X } from "lucide-react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { rooms } from "../layout/main/rooms";
+import { Button } from "../ui/button";
 import {
   Card,
   CardContent,
@@ -6,26 +10,17 @@ import {
   CardHeader,
   CardTitle,
 } from "../ui/card";
-import { useEffect, useRef, useState } from "react";
-import { Button } from "../ui/button";
-import { MessageCircle, Send, X } from "lucide-react";
-import { rooms } from "../layout/main/rooms";
-import { UserAvatar } from "../lfp_card/user-avatar";
 
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
-import { ScrollArea } from "@/components/ui/scroll-area";
-import { EmptyChat } from "./empty-chat";
-
-type Message = {
-  id?: string;
-  user: {
-    name: string;
-    avatar: string;
-  };
-  content: string;
-  timestamp: Date;
-};
+import useSupabaseBrowser from "@/utils/supabase/client";
+import {
+  useInsertMutation,
+  useQuery,
+} from "@supabase-cache-helpers/postgrest-react-query";
+import { toast } from "sonner";
+import { useUser } from "../context/user-context";
+import MessagesList from "./messages-list";
+import { getRoomById } from "@/queries/rooms";
 
 type ChatProps = {};
 const Chat: React.FC<ChatProps> = ({}) => {
@@ -35,7 +30,27 @@ const Chat: React.FC<ChatProps> = ({}) => {
 
   const roomId = searchParams.get("roomId");
 
+  const [newMessage, setNewMessage] = useState("");
   const containerRef = useRef<HTMLDivElement | null>(null);
+
+  const user = useUser();
+  const supabase = useSupabaseBrowser();
+
+  const { data: roomData } = useQuery(getRoomById(supabase, Number(roomId)));
+
+  const { mutateAsync: insertMessage } = useInsertMutation(
+    supabase.from("room_chat"),
+    ["id"],
+    null,
+    {
+      onSuccess: () => toast.message("Message sent!"),
+      revalidateTables: [{ schema: "public", table: "room_chat" }],
+    }
+  );
+
+  // channel?.on("broadcast", { event: "sync" }, (payload) =>
+  //   console.log(payload)
+  // )
 
   const closeChat = () => {
     router.push(pathname);
@@ -58,45 +73,14 @@ const Chat: React.FC<ChatProps> = ({}) => {
     };
   }, []);
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [newMessage, setNewMessage] = useState("");
-  const roomParticipants = rooms.find(
-    (room) => room.id === roomId
-  )?.room_participants;
-  useEffect(() => {
-    const currentRoomChat = rooms
-      .find((room) => room.id === roomId)
-      ?.room_participants.map((participant) => ({
-        id: participant.users.username || "",
-        user: {
-          name: participant.users.username || "",
-          avatar: participant.users.avatar_url || "",
-        },
-        content: "Hey everyone! How's it going?",
-        timestamp: new Date(2023, 5, 1, 14, 30),
-      }));
-
-    if (currentRoomChat) {
-      setMessages(currentRoomChat);
-    }
-  }, [roomId]);
-
-  const handleSendMessage = (e: React.FormEvent) => {
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (newMessage.trim() === "") return;
 
-    const message: Message = {
-      id: (messages.length + 1).toString(),
-      user: {
-        name: "You",
-        avatar:
-          "https://steamcdn-a.akamaihd.net/steamcommunity/public/images/avatars/e3/e32de017ab05fe4e58083175ff1b4fa221ee78a7_full.jpg",
-      },
-      content: newMessage.trim(),
-      timestamp: new Date(),
-    };
+    insertMessage([
+      { room_id: Number(roomId), content: newMessage, user_id: user?.id },
+    ]);
 
-    setMessages([...messages, message]);
     setNewMessage("");
   };
 
@@ -128,7 +112,7 @@ const Chat: React.FC<ChatProps> = ({}) => {
                 </span>
               </div> */}
             {/* </div> */}
-            {rooms.find((room) => room.id === roomId)?.title}
+            {roomData?.title}
           </div>
           <Button
             size="icon"
@@ -140,73 +124,15 @@ const Chat: React.FC<ChatProps> = ({}) => {
           </Button>
         </CardTitle>
         <CardDescription className="text-xs">
-          {rooms.find((room) => room.id === roomId)?.description}
+          {roomData?.description}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex-grow flex flex-col p-0 overflow-hidden">
-        {messages.length === 0 ? (
-          <EmptyChat />
-        ) : (
-          <div className="flex flex-grow">
-            <ScrollArea className="flex-grow h-full px-4">
-              <div className="space-y-4 first:mt-4 last:mb-4">
-                {messages.map((message, index) => (
-                  <div key={message.id} className="flex items-center space-x-4">
-                    <UserAvatar
-                      profilePictureSrc={message.user.avatar}
-                      username={message.user.name}
-                      isOnline={[true, false].at(index % 2) || false}
-                    />
-                    <div className="flex-1 space-y-1">
-                      <div className="flex items-center space-x-2">
-                        <span className="font-semibold text-sm">
-                          {message.user.name}
-                        </span>
-                        <span className="text-xs text-muted-foreground">
-                          {message.timestamp.toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                      </div>
-                      <p className="text-sm break-all">{message.content}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
-            <div className="flex-1 border-l h-full p-4 flex flex-col gap-4 w-[240px] max-w-[240px]">
-              <div className="font-medium text-sm text-muted-foreground">
-                In this room
-              </div>
-              <div className="space-y-4 first:mt-4 last:mb-4">
-                {roomParticipants?.map((participant, index) => (
-                  <div
-                    key={participant.users.username}
-                    className="flex items-center space-x-2"
-                  >
-                    <UserAvatar
-                      profilePictureSrc={participant.users.avatar_url}
-                      username={participant.users.username}
-                      isOnline={true}
-                      size="sm"
-                    />
-                    <div className="flex flex-col">
-                      <span className="font-medium text-xs line-clamp-1">
-                        {participant.users.username}
-                      </span>
-                      <span className="text-xxs text-muted-foreground line-clamp-1">
-                        @{participant.users.username}
-                      </span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        <form onSubmit={handleSendMessage} className="py-2 px-4 border-t">
+      <CardContent className="flex-grow flex flex-col p-0 h-full overflow-hidden">
+        <MessagesList />
+        <form
+          onSubmit={handleSendMessage}
+          className="flex-grow-0 py-2 px-4 border-t"
+        >
           <div className="relative">
             <Input
               type="text"

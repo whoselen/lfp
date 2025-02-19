@@ -23,3 +23,14 @@ export type FormState =
       message?: string;
     }
   | undefined;
+
+export type Message = {
+  id?: string;
+  user: {
+    id?: string;
+    name: string;
+    avatar: string;
+  };
+  content: string;
+  timestamp: string;
+};

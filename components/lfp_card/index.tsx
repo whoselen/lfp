@@ -1,18 +1,20 @@
-import React, { useState } from "react";
+import { getUserById, getUsersByIds } from "@/queries/users";
+import useSupabaseBrowser from "@/utils/supabase/client";
+import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import { useFileUrl } from "@supabase-cache-helpers/storage-react-query";
+import React, { useEffect, useState } from "react";
 import { Separator } from "../ui/separator";
+import ActiveRoomParticipants from "./active-room-participants";
 import JoinButton from "./join-button";
 import { MessageButton } from "./message-button";
 import Slot from "./slot";
-import UserAccessibility from "./user-accessibility";
-import { UserAvatar } from "./user-avatar";
-import UserModeChip from "./user-mode-chip";
-import UserRank from "./user-rank";
-import { AccessibilityToolKey } from "@/lib/constants";
-import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
-import useSupabaseBrowser from "@/utils/supabase/client";
-import { getUserById } from "@/queries/users";
-import UserCustomTags from "./user-custom-tags";
 import UserAccessibilityTools from "./user-accessibility-tools";
+import { UserAvatar } from "./user-avatar";
+import UserCustomTags from "./user-custom-tags";
+import UserRank from "./user-rank";
+import { useUser } from "../context/user-context";
+import { useSearchParams } from "next/navigation";
+import { RealtimeChannel } from "@supabase/supabase-js";
 
 export interface LfpCardProps {
   max_allowed_size: number;
@@ -22,16 +24,15 @@ export interface LfpCardProps {
       avatar_url: string;
     };
   }>;
-
   game: {
     img_url: string;
+    name: string;
   };
   rank_id: number;
   title: string;
   description: string;
   id: number;
   createdUserId: string;
-
   customTagsIds: number[];
   accessibilityToolsIds: number[];
 }
@@ -39,7 +40,6 @@ export interface LfpCardProps {
 const LfpCard: React.FC<LfpCardProps> = ({
   max_allowed_size,
   room_participants,
-
   game,
   rank_id,
   title,
@@ -49,20 +49,66 @@ const LfpCard: React.FC<LfpCardProps> = ({
   customTagsIds,
   accessibilityToolsIds,
 }) => {
+  const searchParams = useSearchParams();
+  const roomId = searchParams.get("roomId");
   const [detailsExpanded, setDetailsExpanded] = useState(false);
 
   const is_upcoming = true;
   const schedule = "2023-10-10T10:00:00Z";
 
-  const availableSlotLength = max_allowed_size - room_participants.length;
-
   const supabase = useSupabaseBrowser();
 
-  const { data: user, isLoading } = useQuery(
-    getUserById(supabase, createdUserId)
+  const { data: gameIconUrl } = useFileUrl(
+    supabase.storage.from("games"),
+    `${game.name}/icon.png`,
+    "public",
+    {
+      refetchOnWindowFocus: false,
+    }
   );
 
-  console.log(user?.avatar_url);
+  const { data: user, isLoading } = useQuery(
+    getUserById(supabase, createdUserId),
+    { refetchOnWindowFocus: false }
+  );
+
+  const [roomParticipants, setRoomParticipants] = useState<{ user_id: any }[]>(
+    []
+  );
+
+  const { data: usersData } = useQuery(
+    getUsersByIds(
+      supabase,
+      roomParticipants.map((user) => user.user_id)
+    ),
+    { retryOnMount: true }
+  );
+
+  useEffect(() => {
+    let channel: RealtimeChannel;
+
+    if (id === Number(roomId)) {
+      channel = supabase.channel(`game_room_${roomId}`);
+      channel.on("presence", { event: "sync" }, () => {
+        const userIds = [];
+
+        for (const id in channel.presenceState()) {
+          // @ts-ignore
+          userIds.push({ user_id: channel.presenceState()[id][0].user_id });
+        }
+        setRoomParticipants([...userIds]);
+      });
+    }
+
+    // Cleanup function
+    return () => {
+      if (channel) {
+        channel.unsubscribe();
+      }
+    };
+  }, [searchParams]);
+
+  const availableSlotLength = max_allowed_size - roomParticipants?.length || 0;
 
   return (
     <article className="inline-block rounded-lg  border-border bg-background p-4 shadow-lg shadow-black/5 border text-black min-w-[560px]">
@@ -101,7 +147,7 @@ const LfpCard: React.FC<LfpCardProps> = ({
                       <span className="inline-block">
                         <img
                           draggable="false"
-                          src={game.img_url}
+                          src={gameIconUrl ?? game.img_url}
                           alt="game-looking-for"
                           className="ml-[2px] max-h-3 select-none object-cover sm:max-h-4"
                         />
@@ -116,7 +162,6 @@ const LfpCard: React.FC<LfpCardProps> = ({
                 <div className="flex flex-row gap-1">
                   <UserCustomTags ids={customTagsIds} />
                 </div>
-
                 <div className="flex w-max flex-wrap gap-[5px]">
                   <UserAccessibilityTools ids={accessibilityToolsIds} />
                 </div>
@@ -125,9 +170,7 @@ const LfpCard: React.FC<LfpCardProps> = ({
           </div>
           <Separator className="mt-2" />
           <div className="text-foreground ml-[5px] mt-4 flex h-full flex-col justify-between gap-1 text-ellipsis">
-            <a
-              href={"javascript:void(0);"}
-              role="button"
+            <div
               className="pr-[6px] {detailsExpanded
             ? ''
             : '[&>*]:line-clamp-2'} flex flex-col gap-2"
@@ -137,25 +180,21 @@ const LfpCard: React.FC<LfpCardProps> = ({
               <p className="font-os inline-block text-[11px] font-normal leading-[15px]">
                 {description}
               </p>
-            </a>
+            </div>
             <div className="mt-4 flex flex-row items-center justify-end gap-[5px]">
               <div className="flex items-center rounded-full border border-border bg-background p-1 shadow shadow-black/5">
                 <div className="flex -space-x-3">
-                  {room_participants.map((participant) => (
-                    <Slot
-                      key={participant.users.username}
-                      filled
-                      src={participant?.users?.avatar_url}
-                      username={participant.users.username}
-                    />
-                  ))}
+                  <ActiveRoomParticipants usersData={usersData} />
                   <Slot
                     availableSlotLength={availableSlotLength}
                     filled={false}
                   />
                 </div>
               </div>
-              <JoinButton roomId={String(id)} />
+              <JoinButton
+                roomId={String(id)}
+                disabled={availableSlotLength === 0}
+              />
             </div>
           </div>
         </div>

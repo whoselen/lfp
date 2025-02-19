@@ -27,7 +27,11 @@ import {
 } from "@/queries/games";
 import useSupabaseBrowser from "@/utils/supabase/client";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
+import {
+  useInsertMutation,
+  useQuery,
+  useUpsertMutation,
+} from "@supabase-cache-helpers/postgrest-react-query";
 import { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -45,6 +49,8 @@ import NumberInput from "../ui/number-input";
 import { Textarea } from "../ui/textarea";
 import { useUser } from "../context/user-context";
 import { toast } from "sonner";
+import clsx from "clsx";
+import { CheckedState } from "@radix-ui/react-checkbox";
 
 type RoomFormProps = {};
 
@@ -78,6 +84,7 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
   const user = useUser();
   const maxLength = 150;
   const [duoOnly, setDuoOnly] = useState(false);
+  const [isFormOpen, setIsFormOpen] = useState(false);
   const {
     value,
     characterCount,
@@ -111,7 +118,10 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
     data: ranks = [],
     isLoading: ranksLoading,
     isError: ranksError,
-  } = useQuery(getRanksByGameId(supabase, selectedGameValue));
+  } = useQuery(getRanksByGameId(supabase, selectedGameValue), {
+    refetchOnWindowFocus: false,
+    // enabled: false,
+  });
 
   const {
     data: tags = [],
@@ -131,88 +141,192 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
     isError: accessibilityToolsError,
   } = useQuery(getAccessibilityTools(supabase));
 
+  const { mutateAsync: insertRoom, data: insertedRoomData } = useInsertMutation(
+    supabase.from("rooms"),
+    ["id"],
+    "id"
+  );
+
+  const { mutateAsync: insertTagsInfo } = useUpsertMutation(
+    supabase.from("room_tags"),
+    ["room_id", "tag_id"],
+    null,
+    {
+      onError() {
+        toast.error("Error creating room");
+      },
+    }
+  );
+
+  const { mutateAsync: insertAccessibilityToolsInfo } = useUpsertMutation(
+    supabase.from("room_accessibility_tools"),
+    ["room_id", "tool_id"],
+    null,
+    {
+      onError() {
+        toast.error("Error creating room");
+      },
+    }
+  );
+
+  const { mutateAsync: insertServersInfo } = useUpsertMutation(
+    supabase.from("room_game_servers"),
+    ["room_id", "server_id"],
+    null,
+    {
+      onError() {
+        toast.error("Error creating room");
+      },
+    }
+  );
+
   useEffect(() => {
     form.resetField("rank_id");
   }, [selectedGameValue]);
 
   useEffect(() => {
     if (duoOnly) {
-      form.setValue("max_participants", 2);
+      form.setValue("max_participants", 1);
     }
   }, [duoOnly]);
 
+  const microphoneToolId = accessibilityTools?.find(
+    (tool) => tool.name.toLowerCase() === "mic only"
+  )?.id;
+
+  const headphoneToolId = accessibilityTools?.find(
+    (tool) => tool.name.toLowerCase() === "headphone only"
+  )?.id;
+
+  const headsetToolId = accessibilityTools?.find(
+    (tool) => tool.name.toLowerCase() === "headset"
+  )?.id;
+
   const onSubmit = async (values: RoomCreateFormValues) => {
-    console.log({ values });
     const {
       title,
       description,
       game_id,
       rank_id,
       max_participants,
-      servers,
       accessibility_tools,
+      servers,
+      tags,
     } = values;
-    console.log(user?.id);
 
     if (!user?.id) {
       return;
     }
 
-    try {
-      // Start a transaction
-      const { data: roomData, error: roomError } = await supabase
-        .from("rooms")
-        .insert([
-          {
-            title,
-            description,
-            user_id: user.id,
-            game_id,
-            rank_id: Number(rank_id),
-            max_participants,
-          },
-        ])
-        .select();
+    insertRoom([
+      {
+        title,
+        description,
+        user_id: user.id,
+        game_id,
+        rank_id: Number(rank_id),
+        max_participants,
+      },
+    ])
+      .then(async (data) => {
+        const roomId = data?.[0].id;
 
-      if (roomError) throw roomError;
+        // Insert into room_accessibility_tools
+        const uniqueTools = [...new Set(accessibility_tools)];
 
-      const roomId = roomData[0].id;
+        const accessibilityToolsInserts = uniqueTools.map((tool_id) => ({
+          room_id: roomId,
+          tool_id,
+        }));
 
-      // Insert into room_accessibility_tools
-      const uniqueTools = [...new Set(accessibility_tools)];
+        await insertAccessibilityToolsInfo(accessibilityToolsInserts);
 
-      const accessibilityToolsInserts = uniqueTools.map((tool_id) => ({
-        room_id: roomId,
-        tool_id,
-      }));
+        // Insert into room_game_servers
+        const tagsInserts = tags.map(({ value }) => ({
+          room_id: roomId,
+          tag_id: Number(value),
+        }));
 
-      const { error: toolsError } = await supabase
-        .from("room_accessibility_tools")
-        .upsert(accessibilityToolsInserts);
+        await insertTagsInfo(tagsInserts);
 
-      if (toolsError) throw toolsError;
+        // Insert into room_game_servers
+        const gameServersInserts = servers.map(({ value }) => ({
+          room_id: roomId,
+          server_id: Number(value),
+        }));
 
-      // Insert into room_game_servers
-      const gameServersInserts = servers.map(({ value }) => ({
-        room_id: roomId,
-        server_id: Number(value),
-      }));
+        await insertServersInfo(gameServersInserts);
+      })
+      .catch(() => {
+        toast.error("Error creating room :(");
+      });
 
-      const { error: serversError } = await supabase
-        .from("room_game_servers")
-        .upsert(gameServersInserts);
+    toast.success("Your room has been created!");
+    form.reset();
+    setDuoOnly(false);
+    setIsFormOpen(false);
+  };
 
-      if (serversError) throw serversError;
+  const handleAccessibilityChecks = (
+    checked: CheckedState,
+    tool: {
+      id: number;
+      name: string;
+    }
+  ) => {
+    // Retrieve the current accessibility tools from toolsValue (use toolsValue instead of form.getValues)
+    const updatedTools = [...toolsValue];
+    const isMicSelected = updatedTools.includes(microphoneToolId!);
+    const isHeadphoneSelected = updatedTools.includes(headphoneToolId!);
+    const isHeadsetSelected = updatedTools.includes(headsetToolId!);
 
-      toast.success("Your room has been created!");
-      form.reset();
-      setDuoOnly(false);
-    } catch (error) {
-      toast.error("Error creating room ");
+    const getNewTools = () => {
+      // If both mic and headphone are selected, select headset and remove mic and headphone
+      if (
+        (tool.id === microphoneToolId && isHeadphoneSelected) ||
+        (tool.id === headphoneToolId && isMicSelected)
+      ) {
+        return [headsetToolId];
+      }
+
+      // If adding mic or headphone, remove headset if selected
+      if (
+        (tool.id === microphoneToolId || tool.id === headphoneToolId) &&
+        isHeadsetSelected
+      ) {
+        return updatedTools
+          .filter((id) => id !== headsetToolId)
+          .concat([tool.id]);
+      }
+
+      // If adding headset, remove mic and headphone if they exist
+      if (tool.id === headsetToolId) {
+        return updatedTools
+          .filter((id) => id !== microphoneToolId && id !== headphoneToolId)
+          .concat([tool.id]);
+      }
+
+      // Default: add the new tool
+      return updatedTools.concat([tool.id]);
+    };
+
+    if (checked) {
+      const newTools = getNewTools();
+      form.setValue(
+        "accessibility_tools",
+        newTools?.filter((tool) => tool !== undefined) ?? []
+      );
+    } else {
+      // If unchecked, remove the selected tool from the array
+      form.setValue(
+        "accessibility_tools",
+        updatedTools.filter((id) => id !== tool.id)
+      );
     }
   };
+
   return (
-    <Sheet>
+    <Sheet open={isFormOpen} onOpenChange={setIsFormOpen}>
       <SheetTrigger asChild>
         <CreateRoom />
       </SheetTrigger>
@@ -241,7 +355,7 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
                       id="duo_only-description"
                       className="text-xs text-muted-foreground"
                     >
-                      If you play duo only, select this option.
+                      If you wanna play duo only, select this option.
                     </p>
                   </div>
                 </div>
@@ -339,30 +453,32 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="max_participants"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormControl>
-                        <div className="flex flex-col space-y-1.5">
-                          <NumberInput
-                            minValue={2}
-                            maxValue={10}
-                            label={
-                              <Label htmlFor="max_participants">
-                                Number of gals you need
-                              </Label>
-                            }
-                            isDisabled={duoOnly}
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {!duoOnly && (
+                  <FormField
+                    control={form.control}
+                    name="max_participants"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <div className="flex flex-col space-y-1.5">
+                            <NumberInput
+                              minValue={2}
+                              maxValue={10}
+                              label={
+                                <Label htmlFor="max_participants">
+                                  Number of gals you need
+                                </Label>
+                              }
+                              isDisabled={duoOnly}
+                              {...field}
+                            />
+                          </div>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}
@@ -472,30 +588,11 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
                                     <Checkbox
                                       id={`${tool.id}`}
                                       value={tool.id}
-                                      checked={toolsValue.some(
-                                        (formTool) => formTool === tool.id
-                                      )}
+                                      checked={toolsValue.includes(tool.id)}
                                       className="sr-only after:absolute after:inset-0"
-                                      onCheckedChange={(checked) => {
-                                        const updatedTools =
-                                          form.getValues(
-                                            "accessibility_tools"
-                                          ) || [];
-
-                                        if (checked) {
-                                          form.setValue("accessibility_tools", [
-                                            ...updatedTools,
-                                            tool.id,
-                                          ]);
-                                        } else {
-                                          form.setValue(
-                                            "accessibility_tools",
-                                            updatedTools.filter(
-                                              (id) => id !== tool.id
-                                            )
-                                          );
-                                        }
-                                      }}
+                                      onCheckedChange={(checked) =>
+                                        handleAccessibilityChecks(checked, tool)
+                                      }
                                     />
                                     <AccessibilityIcons
                                       name={
@@ -506,7 +603,11 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
                                             "-"
                                           ) as AccessibilityToolKey
                                       }
-                                      className="size-5"
+                                      className={clsx(
+                                        "size-5",
+                                        tool.name.toLowerCase() === "discord" &&
+                                          "text-[#7289da]"
+                                      )}
                                     />
                                   </div>
                                   <p className="text-xs">

@@ -4,6 +4,10 @@ const getUserTags = (client: TypedSupabaseClient) => {
   return client.from("tags").select("id, name");
 };
 
+const getUserTagsByIds = (client: TypedSupabaseClient, ids: number[]) => {
+  return client.from("tags").select("id, name").in("id", ids);
+};
+
 const getUserAccessibilityTools = (client: TypedSupabaseClient) => {
   return client.from("accessibility_tools").select("id, name");
 };
@@ -16,4 +20,4 @@ const getUserAccessibilityTools = (client: TypedSupabaseClient) => {
 //     .throwOnError();
 // };
 
-export { getUserTags, getUserAccessibilityTools };
+export { getUserTags, getUserTagsByIds, getUserAccessibilityTools };

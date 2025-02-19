@@ -13,7 +13,7 @@ const RecentRooms = () => {
     data: rooms = [],
     isLoading: ranksLoading,
     isError: ranksError,
-  } = useQuery(getRecentRooms(supabase));
+  } = useQuery(getRecentRooms(supabase), {});
 
   const {
     data: allGames = [],
@@ -46,7 +46,10 @@ const RecentRooms = () => {
                   description={room.description}
                   max_allowed_size={room.max_participants ?? 0}
                   room_participants={[]}
-                  game={{ img_url: game?.image_url ?? "" }}
+                  game={{
+                    name: game?.name ?? "",
+                    img_url: game?.image_url ?? "",
+                  }}
                   rank_id={room.rank_id}
                   createdUserId={room.user_id}
                   customTagsIds={room.room_tags.map((tag) => tag.tag_id) ?? []}

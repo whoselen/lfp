@@ -8,6 +8,8 @@ import {
   HoverCardTrigger,
 } from "../ui/hover-card";
 import { Tilt } from "../ui/tilt";
+import { useFileUrl } from "@supabase-cache-helpers/storage-react-query";
+import useSupabaseBrowser from "@/utils/supabase/client";
 
 interface SlotProps {
   filled: boolean;
@@ -15,6 +17,7 @@ interface SlotProps {
   src?: string;
   username?: string;
   availableSlotLength?: number;
+  bio?: string;
 }
 
 const Slot: React.FC<SlotProps> = ({
@@ -23,7 +26,19 @@ const Slot: React.FC<SlotProps> = ({
   src,
   username,
   availableSlotLength,
+  bio,
 }) => {
+  const supabase = useSupabaseBrowser();
+
+  const { data: url } = useFileUrl(
+    supabase.storage.from("avatars"),
+    src || "",
+    "public",
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   return (
     <>
       {filled ? (
@@ -42,7 +57,7 @@ const Slot: React.FC<SlotProps> = ({
             alt="pfp"
           /> */}
               <Avatar className="h-full w-full ring-2 ring-background">
-                <AvatarImage src={src} alt="pfp" />
+                <AvatarImage src={url} alt="pfp" />
                 <AvatarFallback />
               </Avatar>
             </a>
@@ -54,7 +69,7 @@ const Slot: React.FC<SlotProps> = ({
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage
-                      src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRrRS741KWlE3yP4BRZZs9KGWZmCKSXEeDMbw&s"
+                      src={url}
                       width={40}
                       height={40}
                       alt="Avatar"
@@ -62,17 +77,11 @@ const Slot: React.FC<SlotProps> = ({
                     <AvatarFallback />
                   </Avatar>
                   <div className="space-y-0.5">
-                    <p className="text-sm font-medium">Keith Kennedy</p>
-                    <p className="text-xs text-muted-foreground">@k.kennedy</p>
+                    <p className="text-sm font-medium">{username}</p>
+                    <p className="text-xs text-muted-foreground">@{username}</p>
                   </div>
                 </div>
-                <p className="text-sm text-muted-foreground">
-                  Designer at{" "}
-                  <strong className="font-medium text-foreground">
-                    NOTHING
-                  </strong>
-                  . Playing only for fun.
-                </p>
+                <p className="text-sm text-muted-foreground">{bio}</p>
                 <div className="flex items-center gap-2">
                   <div className="flex -space-x-1.5">
                     <img

@@ -9,4 +9,12 @@ const getUserById = (client: TypedSupabaseClient, userId: string) => {
     .throwOnError();
 };
 
-export { getUserById };
+const getUsersByIds = (client: TypedSupabaseClient, userIds: string[]) => {
+  return client
+    .from("profiles")
+    .select("id, username, avatar_url, bio")
+    .in("id", userIds)
+    .throwOnError();
+};
+
+export { getUserById, getUsersByIds };

@@ -38,10 +38,7 @@ const AccessibilityIcons: React.FC<AccessibilityIconsProps> = ({
     <>
       {Icon &&
         cloneElement(Icon, {
-          className: clsx(
-            cn(iconClass, className),
-            name === "discord" && "text-[#7289da]"
-          ),
+          className: clsx(cn(iconClass, className)),
         })}
     </>
   );

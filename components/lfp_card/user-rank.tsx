@@ -17,7 +17,10 @@ const UserRank: React.FC<UserRankProps> = ({ rankId }) => {
     data: rank,
     isLoading,
     error,
-  } = useQuery(getRankById(supabase, rankId));
+  } = useQuery(getRankById(supabase, rankId), {
+    refetchOnWindowFocus: false,
+    // enabled: false,
+  });
 
   return (
     <Tooltip>

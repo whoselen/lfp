@@ -1,6 +1,8 @@
 import clsx from "clsx";
 import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import { getAvatarUrl } from "@/lib/utils";
+import { useFileUrl } from "@supabase-cache-helpers/storage-react-query";
+import useSupabaseBrowser from "@/utils/supabase/client";
 
 type UserAvatarProps = {
   username: string;
@@ -15,6 +17,17 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   isOnline,
   size = "md",
 }) => {
+  const supabase = useSupabaseBrowser();
+
+  const { data: url } = useFileUrl(
+    supabase.storage.from("avatars"),
+    profilePictureSrc,
+    "public",
+    {
+      refetchOnWindowFocus: false,
+    }
+  );
+
   return (
     <div className="relative">
       <Avatar
@@ -25,7 +38,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
           size === "lg" && "size-16"
         )}
       >
-        <AvatarImage src={getAvatarUrl(profilePictureSrc)} alt={username} />
+        <AvatarImage src={url} alt={username} />
         <AvatarFallback>{username}</AvatarFallback>
       </Avatar>
       <span
