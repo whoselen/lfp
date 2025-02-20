@@ -15,6 +15,7 @@ import UserRank from "./user-rank";
 import { useUser } from "../context/user-context";
 import { useSearchParams } from "next/navigation";
 import { RealtimeChannel } from "@supabase/supabase-js";
+import useRoomStore from "@/stores/room-store";
 
 export interface LfpCardProps {
   max_allowed_size: number;
@@ -105,9 +106,11 @@ const LfpCard: React.FC<LfpCardProps> = ({
   //   };
   // }, [searchParams]);
 
-  const [roomParticipants, setRoomParticipants] = useState<
-    { user_id: string; avatar_url?: string }[]
-  >([]);
+  const participants = useRoomStore((state) => state.participants);
+
+  // const [roomParticipants, setRoomParticipants] = useState<
+  //   { user_id: string; avatar_url?: string }[]
+  // >([]);
 
   // const { data: usersData, refetch: refetchRoomParticipants } = useQuery(
   //   getUsersByIds(
@@ -142,50 +145,51 @@ const LfpCard: React.FC<LfpCardProps> = ({
   //   fetchUsers();
   // }, []);
 
-  useEffect(() => {
-    // Subscribing to real-time events on room users table
+  // useEffect(() => {
+  //   // Subscribing to real-time events on room users table
 
-    const roomSubscription = supabase
-      .channel("room-users-channel")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "room_users",
-          filter: `room_id=eq.${Number(roomId || "0")}`,
-        },
-        (payload) => {
-          if (payload.eventType === "INSERT") {
-            setRoomParticipants((prev) => [
-              ...prev,
-              {
-                user_id: payload.new.user_id,
-                avatar_url: payload.new.avatar_url,
-              },
-            ]);
-          }
-          if (payload.eventType === "DELETE") {
-            setRoomParticipants((prev) =>
-              prev.filter((user) => user.user_id !== payload.old.user_id)
-            );
-          }
-        }
-      )
-      .subscribe();
+  //   const roomSubscription = supabase
+  //     .channel("room-users-channel")
+  //     .on(
+  //       "postgres_changes",
+  //       {
+  //         event: "*",
+  //         schema: "public",
+  //         table: "room_users",
+  //         filter: `room_id=eq.${Number(roomId || "0")}`,
+  //       },
+  //       (payload) => {
+  //         if (payload.eventType === "INSERT") {
+  //           setRoomParticipants((prev) => [
+  //             ...prev,
+  //             {
+  //               user_id: payload.new.user_id,
+  //               avatar_url: payload.new.avatar_url,
+  //             },
+  //           ]);
+  //         }
+  //         if (payload.eventType === "DELETE") {
+  //           setRoomParticipants((prev) =>
+  //             prev.filter((user) => user.user_id !== payload.old.user_id)
+  //           );
+  //         }
+  //       }
+  //     )
+  //     .subscribe();
 
-    // Cleanup subscription on unmount
-    return () => {
-      roomSubscription.unsubscribe();
-    };
-  }, [supabase, roomId]);
+  //   // Cleanup subscription on unmount
+  //   return () => {
+  //     roomSubscription.unsubscribe();
+  //   };
+  // }, [supabase, roomId]);
 
-  console.log({ roomParticipants, roomId });
+  const roomParticipants =
+    roomId && Number(roomId) === id ? participants?.[roomId] || [] : [];
 
   const availableSlotLength = max_allowed_size - roomParticipants?.length || 0;
 
   return (
-    <article className="inline-block rounded-lg  border-border bg-background p-4 shadow-lg shadow-black/5 border text-black min-w-[560px]">
+    <article className="inline-block rounded-lg  border-border bg-background p-4 shadow-lg shadow-black/5 border text-black max-w-[560px] w-full min-w-full">
       <div className="flex h-full w-full flex-row justify-between ">
         <div className="flex flex-col items-center justify-between relative pr-2">
           <div className="flex flex-col items-center gap-4 w-16">

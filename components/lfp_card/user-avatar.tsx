@@ -21,7 +21,7 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
 
   const { data: url } = useFileUrl(
     supabase.storage.from("avatars"),
-    profilePictureSrc,
+    profilePictureSrc ?? "",
     "public",
     {
       refetchOnWindowFocus: false,

@@ -37,7 +37,10 @@ const UserRank: React.FC<UserRankProps> = ({ rankId }) => {
         ) : (
           <div className="flex flex-col items-center gap-1">
             <Avatar className="rounded-none">
-              <AvatarImage src={rank?.image_url ?? ""} alt={rank?.name} />
+              <AvatarImage
+                src={rank?.image_url ?? undefined}
+                alt={rank?.name}
+              />
               <AvatarFallback>{rank?.name}</AvatarFallback>
             </Avatar>
             <Badge className="text-[0.6rem] min-w-max bg-secondary text-secondary-foreground border border-border">

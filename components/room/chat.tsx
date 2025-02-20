@@ -36,6 +36,7 @@ const Chat: React.FC<ChatProps> = ({}) => {
 
   const user = useUser();
   const avatar_url = useUserStore((state) => state.avatar_url);
+  const username = useUserStore((state) => state.username);
   const supabase = useSupabaseBrowser();
 
   const { data: roomData } = useQuery(getRoomById(supabase, Number(roomId)));
@@ -83,6 +84,8 @@ const Chat: React.FC<ChatProps> = ({}) => {
           .eq("user_id", user?.id)
           .single();
 
+        console.log({ existingUser });
+
         // If the user is not already in the room, insert them
         if (!existingUser) {
           const { data, error } = await supabase.from("room_users").insert([
@@ -90,6 +93,7 @@ const Chat: React.FC<ChatProps> = ({}) => {
               room_id: Number(roomId),
               user_id: user?.id,
               avatar_url: avatar_url,
+              username: username,
               entered_at: new Date().toISOString(),
             },
           ]);

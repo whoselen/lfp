@@ -30,16 +30,6 @@ const Slot: React.FC<SlotProps> = ({
 }) => {
   const supabase = useSupabaseBrowser();
 
-  const { data: url } = useFileUrl(
-    supabase.storage.from("avatars"),
-    src ?? "",
-    "public",
-    {
-      enabled: !!src,
-      refetchOnWindowFocus: false,
-    }
-  );
-
   return (
     <>
       {filled ? (
@@ -58,7 +48,7 @@ const Slot: React.FC<SlotProps> = ({
             alt="pfp"
           /> */}
               <Avatar className="h-full w-full ring-2 ring-background">
-                <AvatarImage src={url} alt="pfp" />
+                <AvatarImage src={src} alt="pfp" />
                 <AvatarFallback />
               </Avatar>
             </a>
@@ -70,7 +60,7 @@ const Slot: React.FC<SlotProps> = ({
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage
-                      src={url}
+                      src={src}
                       width={40}
                       height={40}
                       alt="Avatar"

@@ -103,22 +103,27 @@ export default function MainLayout({ user }: { user: User | null }) {
               </nav>
               {activeTab === "lfp-feed" && (
                 <div className="flex gap-3 justify-center mt-2 pr-6">
-                  <div className="flex flex-col gap-2">
+                  <div
+                    className={clsx(
+                      "flex flex-col gap-2",
+                      activeRoomId ? "w-[600px]" : "w-[640px]"
+                    )}
+                  >
                     <RoomForm />
                     {/* <Separator className="mb-0 pb-0" /> */}
-                    <ScrollArea
+                    {/* <ScrollArea
                       className="h-[calc(100vh-10.5rem)] relative"
                       style={{
                         backdropFilter: "blur(20px)",
                       }}
-                    >
-                      <RecentRooms />
-                    </ScrollArea>
+                    > */}
+                    <RecentRooms />
+                    {/* </ScrollArea> */}
                   </div>
 
                   {activeRoomId ? (
                     <div
-                      className="pb-2 flex-1 h-[calc(100vh-6rem)] max-h-[calc(100vh-6rem)]"
+                      className="pb-2 h-[calc(100vh-6rem)] max-h-[calc(100vh-6rem)] flex-grow"
                       // animate-slide-right-to-left
                     >
                       <Chat />
