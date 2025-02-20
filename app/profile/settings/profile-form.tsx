@@ -37,7 +37,7 @@ const profileFormSchema = z.object({
       message: "Username must not be longer than 30 characters.",
     }),
   bio: z.string().max(160).min(4),
-  avatar_url: z.string(),
+  avatar_url: z.string().nullable(),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
@@ -47,7 +47,7 @@ export function ProfileForm() {
   const user = useUser();
   const username = useUserStore((state) => state.username) || "";
   const bio = useUserStore((state) => state.bio) || "";
-  const avatar_url = useUserStore((state) => state.avatar_url) || "";
+  const avatar_url = useUserStore((state) => state.avatar_url);
   const setUserInfo = useUserStore((state) => state.setUserInfo);
 
   const [searchingUsername, setSearchingUsername] = useState(false);
@@ -56,7 +56,7 @@ export function ProfileForm() {
   const defaultValues: Partial<ProfileFormValues> = {
     username: "",
     bio: "",
-    avatar_url: "",
+    avatar_url: null,
   };
 
   const form = useForm<ProfileFormValues>({
@@ -208,6 +208,7 @@ export function ProfileForm() {
       <div className="space-y-6">
         <div className="flex gap-4 items-center">
           <Avatar
+            alt={username}
             defaultImage={avatarUrlValue}
             onUpload={(url) => {
               form.setValue("avatar_url", url);

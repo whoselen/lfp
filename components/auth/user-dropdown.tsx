@@ -28,7 +28,7 @@ export default function UserDropdown() {
   const [state, action, pending] = useActionState(signout, undefined);
   const username = useUserStore((state) => state.username);
   const bio = useUserStore((state) => state.bio);
-  const avatar_url = useUserStore((state) => state.avatar_url) || "";
+  const avatar_url = useUserStore((state) => state.avatar_url);
 
   useEffect(() => {
     state?.errors && toast.error(state.errors);

@@ -72,41 +72,115 @@ const LfpCard: React.FC<LfpCardProps> = ({
     { refetchOnWindowFocus: false }
   );
 
-  const [roomParticipants, setRoomParticipants] = useState<{ user_id: any }[]>(
-    []
-  );
+  // const [roomParticipants, setRoomParticipants] = useState<{ user_id: any }[]>(
+  //   []
+  // );
 
-  const { data: usersData } = useQuery(
-    getUsersByIds(
-      supabase,
-      roomParticipants.map((user) => user.user_id)
-    ),
-    { retryOnMount: true }
-  );
+  // useEffect(() => {
+  //   const channel = supabase.channel(`game_room_${id}`);
+
+  //   channel
+  //     .on("presence", { event: "sync" }, () => {
+  //       const userIds = [];
+
+  //       for (const id in channel.presenceState()) {
+  //         // @ts-ignore
+  //         console.info(roomId, channel.presenceState()[id][0].user_id);
+  //         // @ts-ignore
+  //         userIds.push({ user_id: channel.presenceState()[id][0].user_id });
+  //       }
+
+  //       setRoomParticipants([...userIds]);
+  //       refetchRoomParticipants();
+  //     })
+  //     .subscribe((status) => {
+  //       if (status === "CLOSED") {
+  //         console.log("closed from room:", id);
+  //       }
+  //     });
+
+  //   // Cleanup function
+  //   return () => {
+  //     channel.unsubscribe();
+  //   };
+  // }, [searchParams]);
+
+  const [roomParticipants, setRoomParticipants] = useState<
+    { user_id: string; avatar_url?: string }[]
+  >([]);
+
+  // const { data: usersData, refetch: refetchRoomParticipants } = useQuery(
+  //   getUsersByIds(
+  //     supabase,
+  //     roomParticipants.map((user) => user.user_id)
+  //   ),
+  //   { refetchOnWindowFocus: false }
+  // );
+
+  // useEffect(() => {
+  //   const fetchUsers = async () => {
+  //     const { data, error } = await supabase
+  //       .from("profiles")
+  //       .select("id, username, avatar_url")
+  //       .in(
+  //         "id",
+  //         roomParticipants.map((user) => user.user_id)
+  //       );
+
+  //     if (data) {
+  //       setRoomParticipants(
+  //         data.map((d) => ({
+  //           user_id: d.id,
+  //           avatar_url: d.avatar_url ?? undefined,
+  //         }))
+  //       );
+  //     } else if (error) {
+  //       console.error(error);
+  //     }
+  //   };
+
+  //   fetchUsers();
+  // }, []);
 
   useEffect(() => {
-    let channel: RealtimeChannel;
+    // Subscribing to real-time events on room users table
 
-    if (id === Number(roomId)) {
-      channel = supabase.channel(`game_room_${roomId}`);
-      channel.on("presence", { event: "sync" }, () => {
-        const userIds = [];
-
-        for (const id in channel.presenceState()) {
-          // @ts-ignore
-          userIds.push({ user_id: channel.presenceState()[id][0].user_id });
+    const roomSubscription = supabase
+      .channel("room-users-channel")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "room_users",
+          filter: `room_id=eq.${Number(roomId || "0")}`,
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT") {
+            setRoomParticipants((prev) => [
+              ...prev,
+              {
+                user_id: payload.new.user_id,
+                avatar_url: payload.new.avatar_url,
+              },
+            ]);
+          }
+          if (payload.eventType === "DELETE") {
+            setRoomParticipants((prev) =>
+              prev.filter((user) => user.user_id !== payload.old.user_id)
+            );
+          }
         }
-        setRoomParticipants([...userIds]);
-      });
-    }
+      )
+      .subscribe();
 
-    // Cleanup function
+    // Cleanup subscription on unmount
     return () => {
-      if (channel) {
-        channel.unsubscribe();
-      }
+      roomSubscription.unsubscribe();
     };
-  }, [searchParams]);
+  }, [supabase, roomId]);
+
+  console.log({ roomParticipants, roomId });
 
   const availableSlotLength = max_allowed_size - roomParticipants?.length || 0;
 
@@ -184,7 +258,7 @@ const LfpCard: React.FC<LfpCardProps> = ({
             <div className="mt-4 flex flex-row items-center justify-end gap-[5px]">
               <div className="flex items-center rounded-full border border-border bg-background p-1 shadow shadow-black/5">
                 <div className="flex -space-x-3">
-                  <ActiveRoomParticipants usersData={usersData} />
+                  <ActiveRoomParticipants usersData={roomParticipants} />
                   <Slot
                     availableSlotLength={availableSlotLength}
                     filled={false}

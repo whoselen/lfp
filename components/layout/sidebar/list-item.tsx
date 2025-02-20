@@ -28,7 +28,7 @@ export function ListItem({
         >
           <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-border">
             <AvatarImage
-              src={image_url || ""}
+              src={image_url ?? undefined}
               alt={`${name} logo`}
               className="object-cover"
             />
@@ -54,7 +54,7 @@ export function ListItem({
         </Button>
       </HoverCardTrigger>
       <ListItemHoverContent
-        imageSrc={image_url || ""}
+        imageSrc={image_url}
         name={name}
         description={description}
       />

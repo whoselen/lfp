@@ -21,6 +21,7 @@ import { toast } from "sonner";
 import { useUser } from "../context/user-context";
 import MessagesList from "./messages-list";
 import { getRoomById } from "@/queries/rooms";
+import { useUserStore } from "@/stores/user-store";
 
 type ChatProps = {};
 const Chat: React.FC<ChatProps> = ({}) => {
@@ -34,6 +35,7 @@ const Chat: React.FC<ChatProps> = ({}) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   const user = useUser();
+  const avatar_url = useUserStore((state) => state.avatar_url);
   const supabase = useSupabaseBrowser();
 
   const { data: roomData } = useQuery(getRoomById(supabase, Number(roomId)));
@@ -48,10 +50,6 @@ const Chat: React.FC<ChatProps> = ({}) => {
     }
   );
 
-  // channel?.on("broadcast", { event: "sync" }, (payload) =>
-  //   console.log(payload)
-  // )
-
   const closeChat = () => {
     router.push(pathname);
   };
@@ -61,9 +59,86 @@ const Chat: React.FC<ChatProps> = ({}) => {
       containerRef.current &&
       !containerRef.current.contains(event.target as Node)
     ) {
-      router.push(pathname);
+      closeChat();
     }
   };
+
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!roomId) return;
+
+    const joinRoom = async () => {
+      setLoading(true);
+      try {
+        if (!user?.id) {
+          return;
+        }
+
+        // Check if the user is already in the room
+        const { data: existingUser } = await supabase
+          .from("room_users")
+          .select("*")
+          .eq("room_id", Number(roomId))
+          .eq("user_id", user?.id)
+          .single();
+
+        // If the user is not already in the room, insert them
+        if (!existingUser) {
+          const { data, error } = await supabase.from("room_users").insert([
+            {
+              room_id: Number(roomId),
+              user_id: user?.id,
+              avatar_url: avatar_url,
+              entered_at: new Date().toISOString(),
+            },
+          ]);
+
+          console.log("error", error);
+          console.log("User joined room:", data);
+        }
+      } catch (error) {
+        console.error("Error joining room:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const leaveRoom = async () => {
+      setLoading(true);
+      try {
+        if (!user?.id) {
+          return;
+        }
+        const { data, error } = await supabase
+          .from("room_users")
+          .delete()
+          .eq("room_id", Number(roomId))
+          .eq("user_id", user?.id);
+
+        if (error) throw error;
+        console.log("User left room:", data);
+      } catch (error) {
+        console.error("Error leaving room:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const leaveAndJoinRoom = async () => {
+      // If the user was in another room, leave it
+      await leaveRoom(); // This ensures the user leaves the previous room (if any)
+
+      // Now join the new room
+      await joinRoom(); // Join the new room
+    };
+
+    leaveAndJoinRoom();
+
+    return () => {
+      leaveRoom();
+    };
+  }, [roomId, user]);
 
   useEffect(() => {
     document.addEventListener("mousedown", handleClickOutside);

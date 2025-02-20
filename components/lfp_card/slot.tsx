@@ -32,9 +32,10 @@ const Slot: React.FC<SlotProps> = ({
 
   const { data: url } = useFileUrl(
     supabase.storage.from("avatars"),
-    src || "",
+    src ?? "",
     "public",
     {
+      enabled: !!src,
       refetchOnWindowFocus: false,
     }
   );

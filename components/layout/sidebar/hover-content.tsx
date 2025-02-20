@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { HoverCardContent } from "@/components/ui/hover-card";
 
 type ListItemHoverContentType = {
-  imageSrc: string;
+  imageSrc: string | null;
   name: string | null;
   description?: string | null;
 };
@@ -19,7 +19,7 @@ const ListItemHoverContent: React.FC<ListItemHoverContentType> = ({
         <div className="flex items-center gap-3">
           <Avatar className="h-12 w-12 flex-shrink-0 border-2 border-border">
             <AvatarImage
-              src={imageSrc}
+              src={imageSrc ?? undefined}
               alt={`${name} logo`}
               className="object-cover"
             />

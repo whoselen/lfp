@@ -1,13 +1,16 @@
 import { useImageUpload } from "@/hooks/use-image-upload";
 import { getAvatarUrl } from "@/lib/utils";
 import { ImagePlus, LoaderCircle } from "lucide-react";
+import Avvvatars from "avvvatars-react";
 
 function Avatar({
   defaultImage,
   onUpload,
+  alt,
 }: {
-  defaultImage?: string;
+  defaultImage?: string | null;
   onUpload: (url: string) => void;
+  alt: string;
 }) {
   const {
     previewUrl,
@@ -22,7 +25,7 @@ function Avatar({
   return (
     <div className="">
       <div className="relative flex size-20 items-center justify-center overflow-hidden rounded-full border-4 border-background bg-muted shadow-sm shadow-black/10">
-        {currentImage && (
+        {currentImage ? (
           <img
             src={getAvatarUrl(currentImage)}
             className="h-full w-full object-cover"
@@ -30,6 +33,8 @@ function Avatar({
             height={80}
             alt="pfp"
           />
+        ) : (
+          <Avvvatars style="shape" value={alt} />
         )}
         {uploading ? (
           <LoaderCircle
