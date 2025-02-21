@@ -161,7 +161,7 @@ const MessagesList = () => {
           ))}
         </div>
       </ScrollArea>
-      <div className="flex-1 border-l h-full p-4 flex flex-col gap-4 w-[240px] max-w-[240px]">
+      <div className="flex-grow border-l h-full p-4 flex flex-col gap-4 w-[240px] max-w-[240px]">
         <div className="font-medium text-sm text-muted-foreground">
           In this room
         </div>

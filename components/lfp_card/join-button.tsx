@@ -25,7 +25,8 @@ const JoinButton: React.FC<JoinButtonProps> = ({ roomId, disabled }) => {
     <Button
       className={clsx(
         "relative group rounded-full shadow shadow-black/5",
-        isCurrentUserInRoom && "bg-green-500 hover:bg-green-600"
+        isCurrentUserInRoom &&
+          "bg-green-500 hover:bg-green-600 dark:text-primary"
       )}
       type="button"
       onClick={handleJoin}

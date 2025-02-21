@@ -7,7 +7,7 @@ import { Manrope, Silkscreen } from "next/font/google";
 import "./globals.css";
 import UserContext from "@/components/context/user-context";
 import { ReactQueryClientProvider } from "@/components/providers/react-query-client-provider";
-
+import { CookiesProvider } from "react-cookie";
 // const geistSans = Geist({
 //   variable: "--font-geist-sans",
 //   subsets: ["latin"],

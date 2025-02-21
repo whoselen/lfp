@@ -2,7 +2,7 @@ import { getUserById, getUsersByIds } from "@/queries/users";
 import useSupabaseBrowser from "@/utils/supabase/client";
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
 import { useFileUrl } from "@supabase-cache-helpers/storage-react-query";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { Separator } from "../ui/separator";
 import ActiveRoomParticipants from "./active-room-participants";
 import JoinButton from "./join-button";
@@ -19,12 +19,6 @@ import useRoomStore from "@/stores/room-store";
 
 export interface LfpCardProps {
   max_allowed_size: number;
-  room_participants: Array<{
-    users: {
-      username: string;
-      avatar_url: string;
-    };
-  }>;
   game: {
     img_url: string;
     name: string;
@@ -40,7 +34,6 @@ export interface LfpCardProps {
 
 const LfpCard: React.FC<LfpCardProps> = ({
   max_allowed_size,
-  room_participants,
   game,
   rank_id,
   title,
@@ -73,120 +66,12 @@ const LfpCard: React.FC<LfpCardProps> = ({
     { refetchOnWindowFocus: false }
   );
 
-  // const [roomParticipants, setRoomParticipants] = useState<{ user_id: any }[]>(
-  //   []
-  // );
-
-  // useEffect(() => {
-  //   const channel = supabase.channel(`game_room_${id}`);
-
-  //   channel
-  //     .on("presence", { event: "sync" }, () => {
-  //       const userIds = [];
-
-  //       for (const id in channel.presenceState()) {
-  //         // @ts-ignore
-  //         console.info(roomId, channel.presenceState()[id][0].user_id);
-  //         // @ts-ignore
-  //         userIds.push({ user_id: channel.presenceState()[id][0].user_id });
-  //       }
-
-  //       setRoomParticipants([...userIds]);
-  //       refetchRoomParticipants();
-  //     })
-  //     .subscribe((status) => {
-  //       if (status === "CLOSED") {
-  //         console.log("closed from room:", id);
-  //       }
-  //     });
-
-  //   // Cleanup function
-  //   return () => {
-  //     channel.unsubscribe();
-  //   };
-  // }, [searchParams]);
-
   const participants = useRoomStore((state) => state.participants);
 
-  // const [roomParticipants, setRoomParticipants] = useState<
-  //   { user_id: string; avatar_url?: string }[]
-  // >([]);
-
-  // const { data: usersData, refetch: refetchRoomParticipants } = useQuery(
-  //   getUsersByIds(
-  //     supabase,
-  //     roomParticipants.map((user) => user.user_id)
-  //   ),
-  //   { refetchOnWindowFocus: false }
-  // );
-
-  // useEffect(() => {
-  //   const fetchUsers = async () => {
-  //     const { data, error } = await supabase
-  //       .from("profiles")
-  //       .select("id, username, avatar_url")
-  //       .in(
-  //         "id",
-  //         roomParticipants.map((user) => user.user_id)
-  //       );
-
-  //     if (data) {
-  //       setRoomParticipants(
-  //         data.map((d) => ({
-  //           user_id: d.id,
-  //           avatar_url: d.avatar_url ?? undefined,
-  //         }))
-  //       );
-  //     } else if (error) {
-  //       console.error(error);
-  //     }
-  //   };
-
-  //   fetchUsers();
-  // }, []);
-
-  // useEffect(() => {
-  //   // Subscribing to real-time events on room users table
-
-  //   const roomSubscription = supabase
-  //     .channel("room-users-channel")
-  //     .on(
-  //       "postgres_changes",
-  //       {
-  //         event: "*",
-  //         schema: "public",
-  //         table: "room_users",
-  //         filter: `room_id=eq.${Number(roomId || "0")}`,
-  //       },
-  //       (payload) => {
-  //         if (payload.eventType === "INSERT") {
-  //           setRoomParticipants((prev) => [
-  //             ...prev,
-  //             {
-  //               user_id: payload.new.user_id,
-  //               avatar_url: payload.new.avatar_url,
-  //             },
-  //           ]);
-  //         }
-  //         if (payload.eventType === "DELETE") {
-  //           setRoomParticipants((prev) =>
-  //             prev.filter((user) => user.user_id !== payload.old.user_id)
-  //           );
-  //         }
-  //       }
-  //     )
-  //     .subscribe();
-
-  //   // Cleanup subscription on unmount
-  //   return () => {
-  //     roomSubscription.unsubscribe();
-  //   };
-  // }, [supabase, roomId]);
-
-  const roomParticipants =
-    roomId && Number(roomId) === id ? participants?.[roomId] || [] : [];
-
-  const availableSlotLength = max_allowed_size - roomParticipants?.length || 0;
+  const availableSlotLength = useMemo(
+    () => max_allowed_size - (participants?.[id] || []).length,
+    [participants, id]
+  );
 
   return (
     <article className="inline-block rounded-lg  border-border bg-background p-4 shadow-lg shadow-black/5 border text-black max-w-[560px] w-full min-w-full">
@@ -262,11 +147,13 @@ const LfpCard: React.FC<LfpCardProps> = ({
             <div className="mt-4 flex flex-row items-center justify-end gap-[5px]">
               <div className="flex items-center rounded-full border border-border bg-background p-1 shadow shadow-black/5">
                 <div className="flex -space-x-3">
-                  <ActiveRoomParticipants usersData={roomParticipants} />
-                  <Slot
-                    availableSlotLength={availableSlotLength}
-                    filled={false}
-                  />
+                  <ActiveRoomParticipants roomId={id} />
+                  {availableSlotLength > 0 && (
+                    <Slot
+                      availableSlotLength={availableSlotLength}
+                      filled={false}
+                    />
+                  )}
                 </div>
               </div>
               <JoinButton

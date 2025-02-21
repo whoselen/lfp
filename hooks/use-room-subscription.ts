@@ -13,20 +13,24 @@ const useRoomSubscription = () => {
         "postgres_changes",
         { event: "*", schema: "public", table: "room_users" },
         (payload) => {
+          if (payload.eventType === "DELETE") {
+            // Ensure room_id is available during delete event
+
+            updateParticipant(
+              payload.old.id,
+              undefined,
+              undefined,
+              null,
+              "leave"
+            );
+          }
           if (payload.eventType === "INSERT") {
             updateParticipant(
+              payload.new.id,
               payload.new.room_id,
               payload.new.user_id,
               payload.new,
               "join"
-            );
-          }
-          if (payload.eventType === "DELETE") {
-            updateParticipant(
-              payload.old.room_id,
-              payload.old.user_id,
-              null,
-              "leave"
             );
           }
         }
@@ -36,7 +40,7 @@ const useRoomSubscription = () => {
     return () => {
       supabase.removeChannel(subscription);
     };
-  }, [updateParticipant]);
+  }, [updateParticipant, supabase]);
 };
 
 export default useRoomSubscription;

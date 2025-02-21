@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import dynamic from "next/dynamic";
+import { CookiesProvider } from "react-cookie";
 
 const NextThemesProvider = dynamic(
   () => import("next-themes").then((e) => e.ThemeProvider),
@@ -14,5 +15,11 @@ export function ThemeProvider({
   children,
   ...props
 }: React.ComponentProps<typeof NextThemesProvider>) {
-  return <NextThemesProvider {...props}>{children}</NextThemesProvider>;
+  return (
+    <NextThemesProvider {...props}>
+      <CookiesProvider defaultSetOptions={{ path: "/" }}>
+        {children}
+      </CookiesProvider>
+    </NextThemesProvider>
+  );
 }

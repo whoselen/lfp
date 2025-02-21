@@ -1,6 +1,6 @@
 "use client";
+
 import { AuthForm } from "@/components/auth/auth-form";
-import LfpCard from "@/components/lfp_card";
 import Chat from "@/components/room/chat";
 import { RoomForm } from "@/components/room/room-form";
 import { Button } from "@/components/ui/button";
@@ -21,7 +21,6 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import MultipleSelector from "@/components/ui/multiselect";
-import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Select,
   SelectContent,
@@ -50,10 +49,12 @@ import {
 import { User } from "@supabase/supabase-js";
 import { Sidebar } from "../sidebar";
 import { SegmentedControl } from "./nav-bar";
-import { rooms } from "./rooms";
 import RecentRooms from "./recent-rooms";
+import { useUser } from "@/components/context/user-context";
 
-export default function MainLayout({ user }: { user: User | null }) {
+export default function MainLayout() {
+// { user }: { user?: User | null }
+  const user = useUser();
   const [activeTab, setActiveTab] = useState<string | null>("lfp-feed");
   const searchParams = useSearchParams();
   const activeRoomId = searchParams.get("roomId");

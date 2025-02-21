@@ -4,7 +4,14 @@ export type RoomState = {
   rooms: any;
   hasMore: boolean;
   page: number;
-  participants: any;
+  participants: {
+    [roomId: string]: {
+      avatar_url: string;
+      id: number;
+      user_id: string;
+      username: string;
+    }[];
+  };
   hasRoomsUpdated: boolean;
 };
 
@@ -12,10 +19,11 @@ export type RoomActions = {
   addRooms: (newRooms: any) => void;
   resetRooms: () => void;
   updateParticipant: (
-    roomId: number,
-    userId: string,
-    info: any,
-    action: any
+    connectionId: number,
+    roomId: number | undefined,
+    userId: string | undefined,
+    info: any | undefined,
+    action: "join" | "leave"
   ) => void;
   onRoomsUpdated: () => void;
 };
@@ -50,14 +58,36 @@ const useRoomStore = create<RoomStore>((set) => ({
 
   resetRooms: () =>
     set({
-      rooms: [],
+      rooms: {},
       hasMore: true,
       page: 0,
     }),
 
-  updateParticipant: (roomId, userId, info, action) =>
-    set((state) => {
-      const currentParticipants = state.participants[roomId] || [];
+  updateParticipant: (connectionId, roomId, userId, info, action) => {
+    return set((state) => {
+      // Only find roomId based on connectionId if action is "leave"
+      let currentRoomId = roomId;
+
+      if (action === "leave" && connectionId) {
+        // Search for the roomId that contains the participant with the matching connectionId
+        Object.keys(state.participants).forEach((key) => {
+          const participantsInRoom = state.participants[key];
+          const participant = participantsInRoom.find(
+            (user) => user.id === connectionId
+          );
+          if (participant) {
+            currentRoomId = Number(key); // Room found, set the roomId
+          }
+        });
+      }
+
+      // If no roomId was found and action is "leave", return early
+      if (!currentRoomId) {
+        console.log("Participant not found in any room or no roomId provided");
+        return state;
+      }
+
+      const currentParticipants = state.participants[currentRoomId] || [];
       let updatedParticipants = [...currentParticipants];
 
       if (
@@ -65,23 +95,27 @@ const useRoomStore = create<RoomStore>((set) => ({
         !updatedParticipants.some((user) => user.user_id === userId)
       ) {
         updatedParticipants.push({
-          user_id: userId,
+          id: connectionId,
+          user_id: userId!,
           avatar_url: info?.avatar_url || "",
           username: info?.username || "",
         });
       } else if (action === "leave") {
+        // Filter out the participant by connectionId when leaving
         updatedParticipants = updatedParticipants.filter(
-          ({ user_id }) => user_id !== userId
+          (participant) => participant.id !== connectionId
         );
       }
 
+      // Return the updated state
       return {
         participants: {
           ...state.participants,
-          [roomId]: updatedParticipants,
+          [currentRoomId]: updatedParticipants, // Update the participants for the correct room
         },
       };
-    }),
+    });
+  },
 }));
 
 export default useRoomStore;

@@ -70,7 +70,6 @@ const RecentRooms = () => {
   } = useRoomStore.getState();
 
   const PAGE_SIZE = 6;
-  console.log(page, rooms);
 
   const fetchRecentRoom = useCallback(async () => {
     const { addRooms } = useRoomStore.getState();
@@ -102,8 +101,6 @@ const RecentRooms = () => {
 
     const from = page * PAGE_SIZE;
     const to = from + PAGE_SIZE - 1;
-
-    console.log(`Fetching rooms from ${from} to ${to}`);
 
     const { data, error } = await supabase
       .from("rooms")
@@ -174,7 +171,6 @@ const RecentRooms = () => {
                   title={room.title}
                   description={room.description}
                   max_allowed_size={room.max_participants ?? 0}
-                  room_participants={[]}
                   game={{
                     name: game?.name ?? "",
                     img_url: game?.image_url ?? "",
