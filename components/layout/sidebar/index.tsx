@@ -12,49 +12,35 @@ import useSupabaseBrowser from "@/utils/supabase/client";
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
 import { getGames } from "@/queries/games";
 
-const ggggg = [
-  {
-    name: "Dota 2",
-    description: "The best MOBA enjoyers",
-    avatarSrc:
-      "https://i.pinimg.com/736x/02/67/5c/02675c281fd4103f083323b802f10205.jpg",
-  },
-  {
-    name: "Minecraft",
-    description: "Creative builders and adventurers",
-    avatarSrc:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRMCtFKDuFX3qHZZK2AhY7SC_E8WFtuYR5FnA&s",
-  },
-  {
-    name: "Fortnite",
-    description: "Battle Royale and creative mode players",
-    avatarSrc:
-      "https://crystalpng.com/wp-content/uploads/2024/09/Fortnite-logo-png.png",
-  },
-  {
-    name: "League of Legends",
-    description: "MOBA strategy gamers",
-    avatarSrc:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR-hsVM9oKXRHEDHAIo-W975OpKeCa0OeIiOg&s",
-  },
-  {
-    name: "Valorant",
-    description: "Tactical shooter enthusiasts",
-    avatarSrc:
-      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQHC99xWZ-J68zo80KcsGmBo5zLFsIiaHlnfw&s",
-  },
-];
-
+// Constants
 const MIN_SIDEBAR_WIDTH = 80;
 const MAX_SIDEBAR_WIDTH = 320;
 const COLLAPSE_THRESHOLD = 140;
+const SIDEBAR_COOKIE_NAME = "sidebar-state";
+
+function getSidebarStateFromCookie() {
+  const cookieValue = document.cookie
+    .split("; ")
+    .find((row) => row.startsWith(SIDEBAR_COOKIE_NAME));
+  if (cookieValue) {
+    const isCollapsed = cookieValue.split("=")[1] === "collapsed";
+    return isCollapsed ? MIN_SIDEBAR_WIDTH : MAX_SIDEBAR_WIDTH;
+  }
+  return MAX_SIDEBAR_WIDTH;
+}
+
+function setSidebarStateToCookie(isCollapsed: boolean) {
+  document.cookie = `${SIDEBAR_COOKIE_NAME}=${
+    isCollapsed ? "collapsed" : "expanded"
+  }; path=/; max-age=31536000`;
+}
 
 export function Sidebar() {
   const supabase = useSupabaseBrowser();
-
   const { data: games, isLoading, isError } = useQuery(getGames(supabase));
 
-  const [sidebarWidth, setSidebarWidth] = useState(MAX_SIDEBAR_WIDTH);
+  const initialSidebarWidth = getSidebarStateFromCookie();
+  const [sidebarWidth, setSidebarWidth] = useState(initialSidebarWidth);
   const [isDragging, setIsDragging] = useState(false);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
@@ -75,12 +61,10 @@ export function Sidebar() {
     const newWidth = e.clientX;
     if (newWidth <= MAX_SIDEBAR_WIDTH) {
       setSidebarWidth(MIN_SIDEBAR_WIDTH);
+      setSidebarStateToCookie(true);
     } else if (newWidth >= MIN_SIDEBAR_WIDTH) {
       setSidebarWidth(MAX_SIDEBAR_WIDTH);
-    } else if (newWidth < MIN_SIDEBAR_WIDTH) {
-      setSidebarWidth(MIN_SIDEBAR_WIDTH);
-    } else if (newWidth > MAX_SIDEBAR_WIDTH) {
-      setSidebarWidth(MAX_SIDEBAR_WIDTH);
+      setSidebarStateToCookie(false);
     }
   };
 
@@ -91,7 +75,7 @@ export function Sidebar() {
       document.removeEventListener("mousemove", handleMouseMove);
       document.removeEventListener("mouseup", handleMouseUp);
     };
-  }, [isDragging, handleMouseMove]); // Added handleMouseMove to dependencies
+  }, [isDragging, handleMouseMove]);
 
   return (
     <div
