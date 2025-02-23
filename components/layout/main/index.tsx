@@ -52,9 +52,7 @@ import { SegmentedControl } from "./nav-bar";
 import RecentRooms from "./recent-rooms";
 import { useUser } from "@/components/context/user-context";
 
-export default function MainLayout() {
-  // { user }: { user?: User | null }
-  const user = useUser();
+export default function MainLayout({ user }: { user?: User | null }) {
   const [activeTab, setActiveTab] = useState<string | null>("lfp-feed");
   const searchParams = useSearchParams();
   const activeRoomId = searchParams.get("roomId");

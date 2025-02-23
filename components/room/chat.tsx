@@ -21,7 +21,6 @@ import {
 } from "@supabase-cache-helpers/postgrest-react-query";
 import { toast } from "sonner";
 import { useUser } from "../context/user-context";
-import MessagesList from "./messages-list";
 import { getRoomById } from "@/queries/rooms";
 import { useUserStore } from "@/stores/user-store";
 import MessageRoom from "./message-room";

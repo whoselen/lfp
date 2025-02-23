@@ -8,8 +8,6 @@ const ActiveRoomParticipants = ({ roomId }: { roomId: number }) => {
   // Ensure participants for a valid roomId
   const roomParticipants = roomId ? participants?.[roomId] || [] : [];
 
-  console.log("roomParticipants", roomId, roomParticipants);
-
   // Return early if no roomParticipants or roomId
   if (!roomId || roomParticipants.length === 0) {
     return null;

@@ -13,6 +13,7 @@ import { useRoomStore } from "@/stores/current-room-store";
 import MessageInput from "./message-input";
 import UserMessage from "./user-message";
 import RoomParticipants from "./room-participants";
+import { Skeleton } from "../ui/skeleton";
 
 const Item: Components["Item"] = forwardRef<HTMLDivElement, any>(
   ({ style, children, ...props }, ref) => {
@@ -44,10 +45,10 @@ const MessageRoom = () => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [isFetchingMessages, setIsFetchingMessages] = useState(false);
   const [onlineUsers, setOnlineUsers] = useState<{ user_id: string }[]>([]);
 
-  const roomId = useRoomStore((state) => state.roomId);
+  // const roomId = useRoomStore((state) => state.roomId);
   const setRoomId = useRoomStore((state) => state.setRoomId);
 
   useEffect(() => {
@@ -55,59 +56,38 @@ const MessageRoom = () => {
     virtuosoRef.current.scrollToIndex(messages.length - 1);
   }, []);
 
-  useEffect(() => {
-    if (paramRoomId && paramRoomId !== roomId) {
-      setRoomId(paramRoomId);
-    }
-  }, [paramRoomId]);
+  // useEffect(() => {
+  //   if (paramRoomId && paramRoomId !== roomId) {
+  //     setRoomId(paramRoomId);
+  //   }
+  // }, [paramRoomId]);
 
   // ✅ Load initial messages
   useEffect(() => {
-    if (!roomId) return;
+    if (!paramRoomId) return;
 
     setMessages([]);
     setHasMore(true);
     setPage(0);
+
     loadMoreMessages();
-
-    const subscription = supabase
-      .channel(`messages_room_${roomId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "INSERT",
-          schema: "public",
-          table: "room_chat",
-          filter: `room_id=eq.${roomId}`,
-        },
-        (payload) => {
-          //@ts-ignore
-          setMessages((prev) => [...prev, payload.new]); // Append at bottom
-          virtuosoRef?.current?.scrollToIndex(messages.length - 1);
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(subscription);
-    };
-  }, [roomId]);
+  }, [paramRoomId, user]);
 
   // ✅ Fetch older messages when scrolling up
   const loadMoreMessages = useCallback(async () => {
-    if (!roomId || !hasMore) return;
+    if (!paramRoomId || !hasMore) return;
 
     try {
+      setIsFetchingMessages(true);
       const { data: newMessages, totalCount } = await fetchMessages(
         supabase,
-        Number(roomId),
+        Number(paramRoomId),
         page
       );
 
-      console.log(page, totalCount);
-
       if (page * 15 >= totalCount) {
         setHasMore(false);
+        setIsFetchingMessages(false);
         return;
       }
 
@@ -115,15 +95,42 @@ const MessageRoom = () => {
       setPage((prev) => prev + 1);
     } catch (error) {
     } finally {
+      setIsFetchingMessages(false);
     }
-  }, [roomId, hasMore, supabase]);
+  }, [paramRoomId, hasMore, supabase]);
 
-  console.log({ hasMore });
+  // ✅ Subscription: New messages
+  useEffect(() => {
+    if (!paramRoomId) return;
+    const subscription = supabase
+      .channel(`messages_room_${paramRoomId}`)
+      .on(
+        "postgres_changes",
+        {
+          event: "INSERT",
+          schema: "public",
+          table: "room_chat",
+          filter: `room_id=eq.${paramRoomId}`,
+        },
+        (payload) => {
+          if (payload.eventType === "INSERT" && payload.new) {
+            //@ts-ignore
+            setMessages((prev) => [...prev, payload.new]); // Append at bottom
+            virtuosoRef?.current?.scrollToIndex(messages.length - 1);
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
+  }, [supabase, paramRoomId]);
 
   // ✅ Presence: Track online users
   useEffect(() => {
-    if (!roomId) return;
-    const channel = supabase.channel(`presence_room_${roomId}`);
+    if (!paramRoomId) return;
+    const channel = supabase.channel(`presence_room_${paramRoomId}`);
 
     channel
       .on("presence", { event: "sync" }, () => {
@@ -146,12 +153,24 @@ const MessageRoom = () => {
     return () => {
       channel.unsubscribe();
     };
-  }, [user, roomId]);
+  }, [user, paramRoomId]);
 
   return (
     <div className="flex h-full">
       <div className="flex flex-col flex-grow">
-        {messages.length === 0 ? (
+        {isFetchingMessages ? (
+          <div className="h-full space-y-4 mx-4 mt-4">
+            {Array.from({ length: 5 }).map((_, index) => (
+              <div key={index} className="flex items-center space-x-4">
+                <Skeleton className="h-12 w-12 rounded-full" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-3/4" />
+                  <Skeleton className="h-3 w-1/2" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : messages.length === 0 ? (
           <EmptyChat />
         ) : (
           <Virtuoso
@@ -174,7 +193,11 @@ const MessageRoom = () => {
             )}
           />
         )}
-        <MessageInput userId={userId ?? ""} roomId={Number(roomId ?? "0")} />
+
+        <MessageInput
+          userId={userId ?? ""}
+          roomId={Number(paramRoomId ?? "0")}
+        />
       </div>
       <div className="flex-grow border-l h-full p-4 flex flex-col gap-4 w-[240px] max-w-[240px]">
         <div className="font-medium text-sm text-muted-foreground">
