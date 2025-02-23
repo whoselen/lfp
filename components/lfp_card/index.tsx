@@ -158,7 +158,9 @@ const LfpCard: React.FC<LfpCardProps> = ({
               </div>
               <JoinButton
                 roomId={String(id)}
-                disabled={availableSlotLength === 0}
+                disabled={
+                  createdUserId !== user?.id && availableSlotLength === 0
+                }
               />
             </div>
           </div>
