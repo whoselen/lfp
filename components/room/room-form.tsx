@@ -51,12 +51,14 @@ import { useUser } from "../context/user-context";
 import { toast } from "sonner";
 import clsx from "clsx";
 import { CheckedState } from "@radix-ui/react-checkbox";
+import { useQueryClient } from "@tanstack/react-query";
+import { useRouter } from "next/navigation";
 
 type RoomFormProps = {};
 
 const roomCreateFormSchema = z.object({
   game_id: z.string().min(1, { message: "Select a game too!" }),
-  rank_id: z.string(),
+  rank_id: z.string().min(1, { message: "Please, select your rank!" }),
   description: z
     .string()
     .min(1, { message: "Description is required" })
@@ -83,8 +85,10 @@ type RoomCreateFormValues = z.infer<typeof roomCreateFormSchema>;
 export const RoomForm: React.FC<RoomFormProps> = ({}) => {
   const user = useUser();
   const maxLength = 150;
+  const router = useRouter();
   const [duoOnly, setDuoOnly] = useState(false);
   const [isFormOpen, setIsFormOpen] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const {
     value,
     characterCount,
@@ -202,6 +206,8 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
     (tool) => tool.name.toLowerCase() === "headset"
   )?.id;
 
+  const queryClient = useQueryClient();
+
   const onSubmit = async (values: RoomCreateFormValues) => {
     const {
       title,
@@ -215,9 +221,11 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
     } = values;
 
     if (!user?.id) {
+      toast.error("You need to sign in first!", { position: "bottom-left" });
       return;
     }
 
+    setIsSubmitting(true);
     insertRoom([
       {
         title,
@@ -256,9 +264,16 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
         }));
 
         await insertServersInfo(gameServersInserts);
+
+        queryClient.invalidateQueries({ queryKey: ["rooms"] });
+
+        router.push(`/?roomId=${roomId}`);
       })
       .catch(() => {
         toast.error("Error creating room :(");
+      })
+      .finally(() => {
+        setIsSubmitting(false);
       });
 
     toast.success("Your room has been created!");
@@ -628,7 +643,12 @@ export const RoomForm: React.FC<RoomFormProps> = ({}) => {
             </form>
           </div>
           <SheetFooter className="pt-4 px-4 border-t">
-            <Button type="submit" form="create-room" className="flex-grow">
+            <Button
+              type="submit"
+              form="create-room"
+              className="flex-grow"
+              disabled={isSubmitting}
+            >
               Create a room
             </Button>
           </SheetFooter>

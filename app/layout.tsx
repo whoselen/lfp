@@ -55,7 +55,7 @@ export default function RootLayout({
               <TooltipProvider>{children}</TooltipProvider>
             </UserContext>
           </ThemeProvider>
-          <Toaster />
+          <Toaster position="top-right" />
         </body>
       </html>
     </ReactQueryClientProvider>

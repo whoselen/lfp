@@ -11,7 +11,7 @@ interface UserAccessibilityProps {
 
 const UserAccessibility: React.FC<UserAccessibilityProps> = ({ name }) => {
   return (
-    <Tooltip>
+    <Tooltip delayDuration={0}>
       <TooltipTrigger>
         <Badge
           className={clsx(

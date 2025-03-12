@@ -8,7 +8,7 @@ export interface Message {
   created_at: string;
 }
 
-const PAGE_SIZE = 15;
+const PAGE_SIZE = 30;
 
 export const fetchMessages = async (
   supabase: any,

@@ -1,9 +1,9 @@
 import { useQuery } from "@supabase-cache-helpers/postgrest-react-query";
-import { UserAvatar } from "../lfp_card/user-avatar";
+import { UserAvatar } from "../../lfp_card/user-avatar";
 import { getUserById } from "@/queries/users";
 import useSupabaseBrowser from "@/utils/supabase/client";
 import { formatDistanceToNow } from "date-fns";
-import { Message } from "./fetchMessages";
+import { Message } from "../fetchMessages";
 import { useFileUrl } from "@supabase-cache-helpers/storage-react-query";
 
 const UserMessage = ({

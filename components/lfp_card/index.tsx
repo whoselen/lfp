@@ -20,7 +20,7 @@ import useRoomStore from "@/stores/room-store";
 export interface LfpCardProps {
   max_allowed_size: number;
   game: {
-    img_url: string;
+    img_url: string | undefined;
     name: string;
   };
   rank_id: number;

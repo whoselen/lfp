@@ -3,6 +3,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import React from "react";
 import { Button } from "../ui/button";
 import clsx from "clsx";
+import { useUser } from "../context/user-context";
+import { toast } from "sonner";
 
 interface JoinButtonProps {
   roomId: string;
@@ -14,8 +16,13 @@ const JoinButton: React.FC<JoinButtonProps> = ({ roomId, disabled }) => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const searchParamsRoomId = searchParams.get("roomId");
+  const user = useUser();
 
   const handleJoin = () => {
+    if (!user?.id) {
+      toast.error("You need to sign in first!", { position: "bottom-right" });
+      return;
+    }
     router.push(`${pathname}?roomId=${roomId}`);
   };
 

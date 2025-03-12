@@ -51,7 +51,7 @@ const DropdownSelect: React.FC<DropdownSelectType> = ({
         >
           {value ? (
             <span className="flex min-w-0 items-center gap-2">
-              <Square className="bg-indigo-400/20 text-indigo-500">
+              <Square className="">
                 {selectedOption?.image_url ? (
                   <img
                     className="object-cover size-full"
@@ -93,7 +93,7 @@ const DropdownSelect: React.FC<DropdownSelectType> = ({
                     setOpen(false);
                   }}
                 >
-                  <Square className="bg-indigo-400/20 text-indigo-500">
+                  <Square className=" ">
                     {option.image_url ? (
                       <img
                         className="object-cover size-full"

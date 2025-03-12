@@ -10,7 +10,7 @@ const Square = ({
   <span
     data-square
     className={cn(
-      "flex size-5 items-center justify-center rounded bg-muted text-xs font-medium text-muted-foreground overflow-hidden",
+      "flex size-5 items-center justify-center rounded text-xs font-medium overflow-hidden",
       className
     )}
     aria-hidden="true"
